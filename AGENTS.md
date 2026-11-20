@@ -12,9 +12,11 @@
 - Giữ harness, ghi assumptions/AI log/retro và lý do thay test qua từng phase.
 - Không sửa `.env`, lộ credentials, xóa file hay refactor lớn khi chưa được đồng ý.
 - Không tự tag/push/release khi chưa có yêu cầu; không viết lại lịch sử sau tag.
+- Sau mỗi phase, nhắc người dùng chốt commit/push/tag; chỉ thực hiện khi được yêu cầu.
 - Phase 2: `docs/requirements/phase-2.txt`, Contract v1.1 và thứ tự tick của Ticket-02 là chuẩn; tag phase-1 bất biến.
 - `ng.txt` là file trao đổi local, không commit/push. Spec lưu riêng trong docs/requirements.
 - Geometry và gameplay dùng chung cho 3 Đêm. Pause giữ tick nhưng đóng băng sim_tick và mọi timer.
 - Regression browser phải kiểm tra trái/phải theo màn hình sau xoay camera; performance đo riêng, không suy từ headless.
-
-- Sau mỗi phase, nhắc người dùng chốt commit/push/tag; chỉ thực hiện khi được yêu cầu.
+- Phase 3: Ticket-03/v1.2 thay dầu/shield/win/capacity/score; ADR ở docs/notes/phase-3.md, breaking changes ở CHANGELOG.md.
+- Dầu nguyên đơn vị 1/60, cập nhật bước 2; không early win all_lit. Dawn cần 60% đèn; no_flames ưu tiên.
+- Giữ evidence cũ, verify ghi docs/proof/phase-3. Không triển khai Ticket-04 khi chỉ yêu cầu Phase 3.

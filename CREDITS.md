@@ -7,3 +7,4 @@
 - Font: system fonts sẵn có, không tải dịch vụ ngoài.
 - Harness: `AGENTS.md`, `scripts/verify.mjs`, `scripts/browser-qa.mjs`, workflow CI. Skill hỗ trợ quy trình triển khai web: `sites:sites` của OpenAI; công việc hiện tại nằm trong local Git repository.
 - Phase 2: bản đồ/số liệu theo Ticket-02; nhạc nền, SFX, Gió Lạc, Bùa Gió và geometry ba Đêm được dựng bằng code, không dùng asset ngoài. Các ảnh proof là screenshot Chrome chạy thật.
+- Phase 3: luật theo Ticket-03; thanh dầu, hình giấy rách/xẹp, cảnh báo và palette dễ phân biệt được tạo bằng code. Ảnh proof là screenshot không chỉnh sửa.

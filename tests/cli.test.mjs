@@ -58,7 +58,7 @@ test('CLI pause keeps tick running and uses real ticks for pause events',()=>{
   const inputs=write('pause-frames.json',{frames:[{tick:0,pause:true},{tick:1,pause:false},{tick:15,pause:true},{tick:16,pause:false}]});
   const r=run(['--inputs',inputs]);assert.equal(r.status,0,r.stderr);
   const lines=readFileSync(r.out,'utf8').trim().split('\n').map(JSON.parse);
-  const mid=lines.find(l=>l.type==='snapshot'&&l.tick===10);assert.equal(mid.state,'paused');assert.equal(mid.sim_tick,0);assert.equal(mid.time_left_s,300);
+  const mid=lines.find(l=>l.type==='snapshot'&&l.tick===10);assert.equal(mid.state,'paused');assert.equal(mid.sim_tick,0);assert.equal(mid.time_left_s,240);
   const end=lines.find(l=>l.type==='snapshot'&&l.tick===20);assert.equal(end.sim_tick,5);assert.equal(end.state,'playing');
   assert.equal(lines.find(l=>l.name==='paused').tick,1);assert.equal(lines.find(l=>l.name==='resumed').tick,16);
 });

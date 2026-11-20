@@ -33,9 +33,11 @@ export function validateInputs(value) {
 export function validateScenario(value, tuning, night=1) {
   fields(value, ['player', 'random_motes', 'random_shades', 'random_drifters', 'wind_enabled', 'motes', 'shades', 'lanterns', 'drifters', 'charms', 'time_left_s'], 'scenario');
   if ('player' in value) {
-    fields(value.player, ['pos', 'carried', 'flames','invuln_ticks','dash_cd_ticks','pulse_cd_ticks','charm_ticks'], 'player');
+    fields(value.player, ['pos', 'carried', 'flames','invuln_ticks','dash_cd_ticks','pulse_cd_ticks','charm_ticks','successful_lights'], 'player');
     if ('pos' in value.player) position(value.player.pos, 'player.pos');
-    if ('carried' in value.player) number(value.player.carried, 'carried', 0, tuning.carry_capacity, true);
+    if ('successful_lights' in value.player) number(value.player.successful_lights,'successful_lights',0,Infinity,true);
+    const capacity=Math.min(tuning.capacity_max,tuning.carry_capacity+2*(value.player.successful_lights??0));
+    if ('carried' in value.player) number(value.player.carried, 'carried', 0, capacity, true);
     if ('flames' in value.player) number(value.player.flames, 'flames', 0, Infinity, true);
     for(const key of ['invuln_ticks','dash_cd_ticks','pulse_cd_ticks','charm_ticks'])if(key in value.player)number(value.player[key],key,0,Infinity,true);
   }
@@ -45,9 +47,10 @@ export function validateScenario(value, tuning, night=1) {
   for(const mote of value.motes??[]){if(Array.isArray(mote)){position(mote,'mote');continue;}fields(mote,['id','pos','kind','ttl_s','ttl_ticks'],'mote');position(mote.pos,'mote.pos');if(mote.kind!==undefined&&!['random','dropped'].includes(mote.kind))fail('mote.kind invalid');if(mote.ttl_s!==undefined)number(mote.ttl_s,'ttl_s',0);if(mote.ttl_ticks!==undefined)number(mote.ttl_ticks,'ttl_ticks',0,Infinity,true);if(mote.id!==undefined){if(typeof mote.id!=='string'||!mote.id||moteIds.has(mote.id))fail('mote.id invalid');moteIds.add(mote.id);}}
   const shadeIds = new Set();
   for (const shade of value.shades ?? []) {
-    fields(shade, ['id', 'pos','state','state_ticks_left'], 'shade');
+    fields(shade, ['id', 'pos','state','state_ticks_left','target_lantern_id'], 'shade');
     position(shade.pos, 'shade.pos');
-    if(shade.state!==undefined&&!['spawning','wander','chase','recoil','stunned'].includes(shade.state))fail('shade.state invalid');
+    if(shade.state!==undefined&&!['spawning','wander','chase','recoil','stunned','drain'].includes(shade.state))fail('shade.state invalid');
+    if(shade.target_lantern_id!==undefined&&!Array.from({length:nightMap(night).lanterns.length},(_,i)=>'L'+(i+1)).includes(shade.target_lantern_id))fail('target_lantern_id invalid');
     if(shade.state_ticks_left!==undefined)number(shade.state_ticks_left,'state_ticks_left',0,Infinity,true);
     if ('id' in shade) {
       if (typeof shade.id !== 'string' || !shade.id || shadeIds.has(shade.id)) fail('shade.id: empty or duplicate');
@@ -56,12 +59,15 @@ export function validateScenario(value, tuning, night=1) {
   }
   const lanternIds = new Set();
   for (const lantern of value.lanterns ?? []) {
-    fields(lantern, ['id', 'pos', 'deposited', 'lit'], 'lantern');
+    fields(lantern, ['id', 'pos', 'deposited', 'lit','fuel','ever_lit','relit_count'], 'lantern');
     if (!Array.from({ length: nightMap(night).lanterns.length }, (_, i) => `L${i + 1}`).includes(lantern.id) || lanternIds.has(lantern.id)) fail('lantern.id: unknown or duplicate');
     lanternIds.add(lantern.id);
     if ('pos' in lantern) position(lantern.pos, 'lantern.pos');
     if ('deposited' in lantern) number(lantern.deposited, 'deposited', 0, tuning.lantern_cost, true);
     if ('lit' in lantern) bool(lantern.lit, 'lit');
+    if('fuel'in lantern)number(lantern.fuel,'fuel',0,tuning.fuel_max);
+    if('ever_lit'in lantern)bool(lantern.ever_lit,'ever_lit');
+    if('relit_count'in lantern)number(lantern.relit_count,'relit_count',0,Infinity,true);
   }
   for(const [list,allowed]of [['drifters',['id','pos','state','state_ticks_left','stolen']],['charms',['id','pos','available','respawn_ticks','respawn_s']]]){
     const ids=new Set();

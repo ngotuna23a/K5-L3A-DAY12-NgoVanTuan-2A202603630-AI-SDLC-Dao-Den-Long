@@ -18,12 +18,12 @@ test('standard tuning values match Ticket-02',()=>{
   assert.equal(t.player_speed,6);assert.equal(t.dash_speed,14);assert.equal(t.dash_duration_s,.2);assert.equal(t.dash_cooldown_s,1.5);assert.equal(t.invuln_s,1.5);assert.equal(t.fall_enabled,true);
 });
 test('standard maps, lantern positions, spawn points and zero setup events/score',()=>{
-  for(const night of[1,2,3]){const g=new Game(t,7,{},night),s=g.snapshot();assert.equal(s.night,night);assert.equal(s.tick,0);assert.equal(s.sim_tick,0);assert.equal(g.score,0);assert.deepEqual(g.events,[]);assert.equal(g.lanterns.length,night+4);assert.equal(g.motes.length,20);assert.equal(new Set(g.motes.map(m=>JSON.stringify(m.pos))).size,20);assert.equal(g.shades.length,0);assert.equal(g.timeLeft,[300,330,360][night-1]);}
+  for(const night of[1,2,3]){const g=new Game(t,7,{},night),s=g.snapshot();assert.equal(s.night,night);assert.equal(s.tick,0);assert.equal(s.sim_tick,0);assert.equal(g.score,0);assert.deepEqual(g.events,[]);assert.equal(g.lanterns.length,night+4);assert.equal(g.motes.length,20);assert.equal(new Set(g.motes.map(m=>JSON.stringify(m.pos))).size,20);assert.equal(g.shades.length,0);assert.equal(g.timeLeft,[240,270,300][night-1]);}
   assert.deepEqual(nightMap(1).lanterns[1],[23.8,0,7.7]);assert.deepEqual(nightMap(2).lanterns[4],[87,0,-10]);assert.deepEqual(nightMap(3).lanterns[0],[0,6,6]);
   assert.equal(nightMap(1).motes.length,24);assert.equal(nightMap(2).motes.length,24);assert.equal(nightMap(3).motes.length,30);
 });
 test('tick model, persistent movement, yaw and diagonal normalization regression',()=>{
-  const g=make();assert.deepEqual(g.player.pos,[0,0,0]);steps(g,60,{move:[1,1],cam_yaw_deg:90});near(g.player.pos[0],6/Math.sqrt(2));near(g.player.pos[2],-6/Math.sqrt(2));near(g.timeLeft,299);assert.equal(g.simTick,60);
+  const g=make();assert.deepEqual(g.player.pos,[0,0,0]);steps(g,60,{move:[1,1],cam_yaw_deg:90});near(g.player.pos[0],6/Math.sqrt(2));near(g.player.pos[2],-6/Math.sqrt(2));near(g.timeLeft,239);assert.equal(g.simTick,60);
 });
 test('jump only on ground; full air control; held jump never repeats',()=>{
   const g=make();g.step({jump:true,move:[1,0]});assert.ok(g.player.pos[1]>0);const y=g.player.pos[1];g.step({jump:false,move:[-1,0]});g.step({jump:true});assert.ok(g.player.pos[1]>y);steps(g,120,{move:[0,0]});assert.equal(g.player.pos[1],0);assert.equal(g.player.grounded,true);g.step({jump:false});g.step({jump:true});assert.ok(g.player.pos[1]>0);
@@ -34,12 +34,12 @@ test('inclusive pickup, cap, height and no points for picking up',()=>{
   const edge=make({player:{pos:[0,1.5,0]},motes:[[1,0,0]]});edge.step();assert.equal(edge.player.carried,1);
 });
 test('deposit nearest unlit, tie by numeric id, partial progress and edge activation',()=>{
-  const g=make({player:{carried:3},lanterns:[{id:'L1',pos:[2,0,0]},{id:'L2',pos:[-2,0,0]}]});g.step({interact:true});assert.equal(g.lanterns[0].deposited,3);assert.equal(g.score,30);
-  g.player.carried=10;g.step();assert.equal(g.lanterns[0].deposited,3);g.step({interact:false});g.step({interact:true});assert.equal(g.player.carried,3);assert.equal(g.lanterns[0].lit,true);assert.equal(g.score,200);
+  const g=make({player:{carried:3},lanterns:[{id:'L1',pos:[2,0,0]},{id:'L2',pos:[-2,0,0]}]});g.step({interact:true});assert.equal(g.lanterns[0].deposited,3);assert.equal(g.score,15);
+  g.player.carried=10;g.step();assert.equal(g.lanterns[0].deposited,3);g.step({interact:false});g.step({interact:true});assert.equal(g.player.carried,3);assert.equal(g.lanterns[0].lit,true);assert.equal(g.score,150);
   const outside=make({player:{carried:10},lanterns:[{id:'L1',pos:[2.01,0,0]}]});outside.step({interact:true});assert.equal(outside.player.carried,10);
 });
 test('win priority at dawn, standardized points and bonus exactly once',()=>{
-  const g=make({time_left_s:1/60,player:{carried:10},lanterns:Array.from({length:5},(_,i)=>({id:'L'+(i+1),...(i?{lit:true}:{pos:[0,0,0]})}))});assert.equal(g.score,0);g.step({interact:true});assert.equal(g.state,'won');assert.equal(g.score,100+100+150);assert.deepEqual(events(g,'game_over')[0].data,{result:'won',reason:'all_lit'});const before=g.end();g.step();assert.deepEqual(g.end(),before);
+  const g=make({time_left_s:1/60,player:{carried:10},lanterns:Array.from({length:5},(_,i)=>({id:'L'+(i+1),...(i?{lit:true}:{pos:[0,0,0]})}))});assert.equal(g.score,0);g.step({interact:true});assert.equal(g.state,'won');assert.equal(g.score,1046);assert.deepEqual(events(g,'game_over')[0].data,{result:'won',reason:'dawn_survived'});const before=g.end();g.step();assert.deepEqual(g.end(),before);
 });
 test('no flames has priority over all lights and dawn',()=>{
   const g=make({player:{flames:0},time_left_s:0,lanterns:Array.from({length:5},(_,i)=>({id:'L'+(i+1),lit:true}))});g.step();assert.equal(g.state,'lost');assert.equal(events(g,'game_over')[0].data.reason,'no_flames');
@@ -118,7 +118,7 @@ test('drifter does not chase poor player, ignores safe zone, disappears after 24
 });
 test('pause freezes every gameplay counter/spawn/TTL while tick and edges continue',()=>{
   const g=make({player:{invuln_ticks:10,dash_cd_ticks:10,pulse_cd_ticks:10,charm_ticks:10},motes:[{pos:[10,0,0],kind:'dropped',ttl_ticks:100}],charms:[{id:'C1',pos:[20,0,0],available:false,respawn_ticks:100}]},2);
-  g.step({pause:true,move:[1,0]});assert.equal(g.state,'paused');assert.equal(g.simTick,0);steps(g,50);assert.equal(g.tick,51);assert.equal(g.timeLeft,330);assert.equal(g.player.invulnTicks,10);assert.equal(g.motes[0].ttl,100);assert.equal(g.charms[0].respawnTicks,100);g.step({pause:false});g.step({pause:true});assert.equal(g.state,'playing');assert.equal(g.simTick,1);assert.equal(g.player.invulnTicks,9);assert.equal(events(g,'resumed').length,1);
+  g.step({pause:true,move:[1,0]});assert.equal(g.state,'paused');assert.equal(g.simTick,0);steps(g,50);assert.equal(g.tick,51);assert.equal(g.timeLeft,270);assert.equal(g.player.invulnTicks,10);assert.equal(g.motes[0].ttl,100);assert.equal(g.charms[0].respawnTicks,100);g.step({pause:false});g.step({pause:true});assert.equal(g.state,'playing');assert.equal(g.simTick,1);assert.equal(g.player.invulnTicks,9);assert.equal(events(g,'resumed').length,1);
 });
 test('spawn schedules exact ticks, newborns interact next tick and no overlapping random motes',()=>{
   const g=new Game(t,1,{random_shades:false,random_drifters:false});steps(g,239);assert.equal(g.motes.length,20);g.step();assert.equal(g.motes.length,21);

@@ -1,0 +1,376 @@
+{
+  "contract_version": "1.2",
+  "node": "v22.23.5",
+  "machine": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz"
+  },
+  "cases": [
+    {
+      "name": "dash",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 12,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "pause",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 120,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "fall",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 61,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "pad",
+      "night": 2,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 90,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "upper-pad",
+      "night": 3,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 60,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "charm",
+      "night": 2,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 30,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "drifter",
+      "night": 2,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "drifter-drop",
+      "night": 2,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "wind",
+      "night": 3,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 2100,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "safe-zone",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 30,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "pulse",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 15,
+        "state": "playing",
+        "score": 5
+      }
+    },
+    {
+      "name": "dawn",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 3,
+        "state": "lost",
+        "score": 0
+      }
+    },
+    {
+      "name": "no-flames",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "lost",
+        "score": 0
+      }
+    },
+    {
+      "name": "win",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "won",
+        "score": 1046
+      }
+    },
+    {
+      "name": "out",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "refuel",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "playing",
+        "score": 10
+      }
+    },
+    {
+      "name": "relight",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "playing",
+        "score": 65
+      }
+    },
+    {
+      "name": "capacity",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "playing",
+        "score": 150
+      }
+    },
+    {
+      "name": "drain",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 60,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "weak-shield",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 30,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "refuel-shield",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 30,
+        "state": "playing",
+        "score": 10
+      }
+    },
+    {
+      "name": "dawn-win",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "won",
+        "score": 510
+      }
+    },
+    {
+      "name": "dawn-loss",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "lost",
+        "score": 0
+      }
+    },
+    {
+      "name": "final-hit",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "lost",
+        "score": 0
+      }
+    },
+    {
+      "name": "no-early",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 30,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "pulse-drain",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "playing",
+        "score": 15
+      }
+    },
+    {
+      "name": "fuel-pause",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 120,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "default-play",
+      "night": 1,
+      "seed": 202603630,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 14400,
+        "state": "won",
+        "score": 1595
+      },
+      "scenario_override": false
+    }
+  ],
+  "benchmarks": [
+    {
+      "night": 1,
+      "ticks": 14400,
+      "seconds": 0.9398923999999997,
+      "threshold_s": 30,
+      "passed": true,
+      "command": "C:\\Users\\ngova\\AppData\\Local\\Programs\\SC17-Node\\node-v22.23.5-win-x64\\node.exe src/headless.mjs --seed 42 --night 1 --scenario D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\docs\\proof\\phase-3\\benchmark-scenario.json --ticks 14400 --snapshot-every 600 --out D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\docs\\proof\\phase-3\\benchmark-night-1.jsonl",
+      "note": "Only health overridden to prevent early death; normal world and scheduled spawns run"
+    },
+    {
+      "night": 2,
+      "ticks": 16200,
+      "seconds": 1.1116183000000002,
+      "threshold_s": 30,
+      "passed": true,
+      "command": "C:\\Users\\ngova\\AppData\\Local\\Programs\\SC17-Node\\node-v22.23.5-win-x64\\node.exe src/headless.mjs --seed 42 --night 2 --scenario D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\docs\\proof\\phase-3\\benchmark-scenario.json --ticks 16200 --snapshot-every 600 --out D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\docs\\proof\\phase-3\\benchmark-night-2.jsonl",
+      "note": "Only health overridden to prevent early death; normal world and scheduled spawns run"
+    },
+    {
+      "night": 3,
+      "ticks": 18000,
+      "seconds": 2.1369968999999984,
+      "threshold_s": 30,
+      "passed": true,
+      "command": "C:\\Users\\ngova\\AppData\\Local\\Programs\\SC17-Node\\node-v22.23.5-win-x64\\node.exe src/headless.mjs --seed 42 --night 3 --scenario D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\docs\\proof\\phase-3\\benchmark-scenario.json --ticks 18000 --snapshot-every 600 --out D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\docs\\proof\\phase-3\\benchmark-night-3.jsonl",
+      "note": "Only health overridden to prevent early death; normal world and scheduled spawns run"
+    }
+  ],
+  "http": "13 checks passed",
+  "source_sha256": {
+    "game.contract.json": "ea452cd3c470f3174057c4ce815cd0afc46c76ca82bdd638eeec4531e34ebb85",
+    "src/game.mjs": "6c32cf0b46b18c0dc31333abb0d7a1393fa7f1912c507fafeb7c25236763fcea",
+    "src/world.mjs": "118617661031e898273125c6a94ddf3420bec2e65125b808bb1ebd1b3e3ad979",
+    "src/campaign.mjs": "be20cf82fd80a1176e65a69115e3ed031d3e68eeb326fe9da5066800d2effd3e",
+    "src/audio.mjs": "2dc15e1407d87233daf0b6d97f2f67a88d5a65edd768de9b9a115069f87a55e0",
+    "src/validation.mjs": "f6a85abf131985a63057eb13e908e1549f7bcbae1630e0aa3f91cad3eb60bb85",
+    "src/headless.mjs": "2b3acb3938cee94b5010cdf8e7455075e9c3fec7a3246be8a1bdeef7cac89728",
+    "src/browser.mjs": "ea2e9950098d1b18402a773c959ae417375ce71253150229998f88df0a7d0589",
+    "tests/game.test.mjs": "0bf8f3c1e23e9c10e7268117044f43479c6e104046ee5b081b415d81ce8bf863",
+    "tests/cli.test.mjs": "16a30af6d6b7250515eab6ad8a5136edc49e01e9d0ae72a209f916064c60112a",
+    "tests/phase3.test.mjs": "a6ee99a31236c75396d16b0e375a58f4318bd5887dd67a72bfb9e6ad24161765",
+    "scripts/autoplay.mjs": "811545c2168d34c16c7907665e6a4f56ef13c058e3bea062dca2ab7a0718aa57",
+    "scripts/verify.mjs": "b8c2576a74b6142c7a36dafa34483c5f5de4af74624a058ae5b80ddb4b3a9543",
+    "scripts/build.mjs": "f84f69db5bed9851b00e4c4561f63384c038e88a080f37d9ffa0114391f930e4",
+    "scripts/browser-qa.mjs": "2592e01bb634f744e15039d74f56af80f83b95c13c18a67f7122c44257582669",
+    "index.html": "04fe9fd2adf6f2cf327699b532ce96df363acf763678ed75c7f56947575b4c9e",
+    "style.css": "04196739626240b2e477b74acebd2fdbb4512cf63fb158c991e39eb1e1123c55",
+    "package-lock.json": "048a0abc56b5e5a7e1eed6b055fad2d659540fe0f8835a9f2f009ac3824e13c9"
+  },
+  "limits": [
+    "Browser QA and FPS recorded separately",
+    "Windows local run; CI records its own environment",
+    "GUI campaign wins use scenarios; default Night 1 win above is input-only with no scenario override"
+  ]
+}

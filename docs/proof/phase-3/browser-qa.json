@@ -1,0 +1,123 @@
+{
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/158.0.8127.36",
+    "revision": "@14d6f648e8cd7ad750a4044200ce94d3321be260",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
+    "jsVersion": "15.8.62.31"
+  },
+  "checks": [
+    "WebGL renders main menu and default Night 1",
+    "Menu to Ông Đăng introduction to gameplay; audio unlocked",
+    "W moves forward",
+    "A/D and arrow keys agree with screen left/right",
+    "Screen left/right remain correct after camera rotation",
+    "Jump lands on the shared terrain",
+    "Shift triggers dash and HUD cooldown",
+    "P pauses simulation, advances only tick, exposes all pause actions",
+    "Volume/sensitivity settings apply and resume works",
+    "Settings persist across reload",
+    "Night 2 bridge/pads/charm and ten-slot HUD render",
+    "Night 2 jump pad launches and lands on the other island",
+    "Gió Lạc steals three and enters flee",
+    "Fall penalty and respawn render correctly",
+    "Q pulses, consumes three and stuns enemy",
+    "Last 30 seconds uses danger color and flashing",
+    "Successful lights expand capacity and the HUD slots",
+    "All lamps lit no longer finishes the night early",
+    "Fuel bars, twenty-percent collapsed/torn unlit lanterns and low-fuel state",
+    "Colorblind mode turns shade eyes/outline blue and warnings white with icon",
+    "Low-fuel blink follows the 30-tick half-cycle (1 Hz)",
+    "Colorblind setting persists across reload",
+    "Night 3 tiers, tower, ramps and strong wind render",
+    "Three-night campaign, Ông Đăng intros, result screens and dawn total",
+    "Loss retries current night with full health",
+    "Measured actual FPS at 1280x720 in Night 3 stress scene",
+    "Palette matches Ticket-02 hex values",
+    "Mobile viewport has no horizontal overflow",
+    "No browser runtime or resource errors"
+  ],
+  "errors": [],
+  "horizontal": [
+    {
+      "code": "KeyA",
+      "sign": -1,
+      "delta": -0.05543620962946495
+    },
+    {
+      "code": "KeyD",
+      "sign": 1,
+      "delta": 0.05577978997391925
+    },
+    {
+      "code": "ArrowLeft",
+      "sign": -1,
+      "delta": -0.11191065049866156
+    },
+    {
+      "code": "ArrowRight",
+      "sign": 1,
+      "delta": 0.055892333563880965
+    },
+    {
+      "code": "KeyA",
+      "sign": -1,
+      "delta": -0.06765469224979287
+    },
+    {
+      "code": "KeyD",
+      "sign": 1,
+      "delta": 0.059055525827265455
+    }
+  ],
+  "campaign": {
+    "scenarioBased": true,
+    "scores": [
+      1040,
+      1188,
+      1336
+    ],
+    "total": 3564
+  },
+  "performance": {
+    "frames": 361,
+    "fps": 60.001000016666936,
+    "width": 1280,
+    "height": 720,
+    "pixelRatio": 1,
+    "threshold_fps": 30,
+    "measurement_s": 6,
+    "passed": true
+  },
+  "renderer": {
+    "calls": 63,
+    "triangles": 9488,
+    "gpu": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x00009A49) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+  },
+  "palette": {
+    "sky": "#0E1430",
+    "fog": "#1B2350",
+    "grass": "#2F5D50",
+    "sand": "#C9B48A",
+    "wood": "#6B4A2F",
+    "cloud": "#12384A",
+    "lit": "#FFB347",
+    "core": "#FFE9B0",
+    "unlit": "#5B5F6E",
+    "mote": "#FFF6C2",
+    "halo": "#FFE58A",
+    "shade": "#120A1A",
+    "outline": "#7A3CFF",
+    "stunned": "#3A3450",
+    "tunic": "#E8E2D0",
+    "red": "#C8102E",
+    "gold": "#F2C14E",
+    "drifter": "#8FA3B8",
+    "danger": "#FF5A5F",
+    "text": "#F5F1E6"
+  },
+  "limits": [
+    "Campaign GUI win tests use explicit scenarios; not a normal-world human playthrough",
+    "Audio verified by Web Audio state and event execution, not a listening test"
+  ]
+}
