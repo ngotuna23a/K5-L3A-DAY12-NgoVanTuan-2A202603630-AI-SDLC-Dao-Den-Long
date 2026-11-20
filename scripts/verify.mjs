@@ -1,65 +1,44 @@
-import { spawn, spawnSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
-import { resolve } from 'node:path';
-import { cpus, platform, release } from 'node:os';
-import assert from 'node:assert/strict';
-import { planDefaultNight } from './autoplay.mjs';
-
-const proof = resolve('docs/proof/phase-1'); mkdirSync(proof, { recursive: true });
-function command(args, record) {
-  const result = spawnSync(process.execPath, args, { encoding: 'utf8' });
-  if (record) writeFileSync(resolve(proof, record), result.stdout + result.stderr);
-  if (result.status !== 0) { process.stderr.write(result.stdout + result.stderr); throw new Error(`Failed: node ${args.join(' ')}`); }
-  return result.stdout;
-}
-console.log('Running unit and CLI tests...'); command(['--test'], 'tests.tap');
-console.log('Building web game...'); command(['scripts/build.mjs'], 'build.txt');
-const cases = [
-  { name: 'win', ticks: 60, inputs: true, state: 'won', endTick: 9, event: 'lantern_lit', eventCount: 5 },
-  { name: 'pulse', ticks: 10, inputs: true, state: 'playing', endTick: 10, event: 'pulse', eventCount: 1 },
-  { name: 'no-flames', ticks: 60, state: 'lost', endTick: 1, event: 'player_hit', eventCount: 1 },
-  { name: 'dawn', ticks: 60, state: 'lost', endTick: 3, event: 'game_over', eventCount: 1 }
+import{spawn,spawnSync}from'node:child_process';
+import{mkdirSync,readFileSync,writeFileSync}from'node:fs';
+import{createHash}from'node:crypto';
+import{resolve}from'node:path';
+import{cpus,platform,release}from'node:os';
+import assert from'node:assert/strict';
+import{planDefaultNight}from'./autoplay.mjs';
+const proof=resolve('docs/proof/phase-2');mkdirSync(proof,{recursive:true});
+function command(args,record){const r=spawnSync(process.execPath,args,{encoding:'utf8',timeout:35000,maxBuffer:20*1024*1024});if(record)writeFileSync(resolve(proof,record),r.stdout+r.stderr);if(r.status!==0){process.stderr.write(r.stdout+r.stderr);throw Error('Failed: node '+args.join(' ')+(r.error?' '+r.error.message:''));}return r.stdout;}
+console.log('Running unit and CLI regression...');command(['--test'],'tests.tap');
+console.log('Building all three nights...');command(['scripts/build.mjs'],'build.txt');
+const cases=[
+  {name:'dash',night:1,ticks:12,inputs:true,check:s=>assert.ok(Math.abs(s.player.pos[2]-2.8)<.001)},
+  {name:'pause',night:1,ticks:120,inputs:true,check:s=>{assert.equal(s.sim_tick,60);assert.equal(s.player.charm_s,9);}},
+  {name:'fall',night:1,ticks:61,check:s=>{assert.deepEqual(s.player.pos,[0,0,0]);assert.equal(s.player.flames,2);assert.equal(s.player.carried,0);}},
+  {name:'pad',night:2,ticks:90,check:s=>{assert.ok(s.player.pos[0]>42);assert.equal(s.player.grounded,true);}},
+  {name:'upper-pad',night:3,ticks:60,check:s=>{assert.equal(s.player.pos[1],6);assert.equal(s.player.grounded,true);}},
+  {name:'charm',night:2,ticks:30,inputs:true,check:(s,lines)=>{assert.ok(s.player.charm_s>0);assert.equal(s.player.dash_cd_s,0);assert.equal(lines.filter(l=>l.name==='dash').length,2);}},
+  {name:'drifter',night:2,ticks:1,check:s=>{assert.equal(s.player.carried,5);assert.equal(s.drifters[0].stolen,3);}},
+  {name:'drifter-drop',night:2,ticks:1,inputs:true,check:s=>{assert.equal(s.motes.length,3);assert.equal(s.drifters[0].stolen,0);assert.ok(s.motes.every(m=>m.kind==='dropped'));}},
+  {name:'wind',night:3,ticks:2100,check:(s,lines)=>{assert.equal(s.wind.active,false);assert.ok(lines.some(l=>l.type==='snapshot'&&l.sim_tick===1800&&l.wind.active));}},
+  {name:'safe-zone',night:1,ticks:30,check:s=>{assert.equal(s.player.flames,3);assert.ok(Math.abs(Math.hypot(s.shades[0].pos[0],s.shades[0].pos[2])-6)<.001);}},
+  {name:'pulse',night:1,ticks:15,inputs:true,check:s=>{assert.equal(s.player.carried,7);assert.equal(s.shades[0].state,'stunned');assert.ok(Math.abs(s.shades[0].pos[0]-7)<.001);}},
+  {name:'dawn',night:1,ticks:60,state:'lost',endTick:3},
+  {name:'no-flames',night:1,ticks:60,state:'lost',endTick:1},
+  {name:'win',night:1,ticks:60,inputs:true,state:'won',endTick:1}
 ];
-for (const item of cases) {
-  const out = resolve(proof, `${item.name}.jsonl`);
-  const args = ['src/headless.mjs', '--seed', '42', '--night', '1', '--scenario', `tests/scenarios/${item.name}.json`, '--ticks', String(item.ticks), '--snapshot-every', '1', '--out', out];
-  if (item.inputs) args.push('--inputs', `tests/scenarios/${item.name}-inputs.json`);
-  command(args);
-  const first = readFileSync(out, 'utf8'); command(args); assert.equal(readFileSync(out, 'utf8'), first);
-  const lines = first.trim().split('\n').map(JSON.parse);
-  assert.equal(lines[0].tick, 0); assert.equal(lines.at(-1).type, 'end');
-  assert.equal(lines.at(-1).state, item.state); assert.equal(lines.at(-1).ticks, item.endTick);
-  assert.equal(lines.filter(l => l.type === 'event' && l.name === item.event).length, item.eventCount);
-  item.result = lines.at(-1); item.deterministic = true;
-}
-const tuning = JSON.parse(readFileSync('game.contract.json', 'utf8')).tuning;
-const plan = planDefaultNight(tuning);
-assert.equal(plan.expected.state, 'won', 'Input-only bot must complete default night');
-writeFileSync(resolve(proof, 'default-play-inputs.json'), JSON.stringify({ frames: plan.frames }) + '\n');
-const replayArgs = ['src/headless.mjs', '--seed', String(plan.seed), '--night', '1', '--inputs', resolve(proof, 'default-play-inputs.json'), '--ticks', '18000', '--snapshot-every', '60', '--out', resolve(proof, 'default-play.jsonl')];
-command(replayArgs);
-const replay = readFileSync(resolve(proof, 'default-play.jsonl'), 'utf8');
-command(replayArgs); assert.equal(readFileSync(resolve(proof, 'default-play.jsonl'), 'utf8'), replay);
-const replayLines = replay.trim().split('\n').map(JSON.parse);
-assert.deepEqual(replayLines.at(-1), plan.expected);
-assert.equal(replayLines.filter(l => l.name === 'lantern_lit').length, 5);
-cases.push({ name: 'default-play', seed: plan.seed, deterministic: true, result: plan.expected, description: 'Default world, no scenario override, input-only bot replayed by public CLI' });
-console.log('Checking built site over HTTP...');
-const server = spawn(process.execPath, ['scripts/serve.mjs'], { env: { ...process.env, PORT: '0' }, stdio: ['ignore', 'pipe', 'pipe'] });
-try {
-  const address = await new Promise((ok, no) => {
-    const timeout = setTimeout(() => no(new Error('HTTP server start timeout')), 10000);
-    server.stdout.on('data', chunk => { const match = chunk.toString().match(/http:\/\/localhost:(\d+)/); if (match) { clearTimeout(timeout); ok(`http://127.0.0.1:${match[1]}`); } });
-    server.once('error', e => { clearTimeout(timeout); no(e); });
-    server.once('exit', code => { clearTimeout(timeout); no(new Error(`HTTP server exited ${code}`)); });
-  });
-  for (const path of ['/', '/style.css', '/src/browser.mjs', '/src/game.mjs', '/vendor/three.module.js', '/vendor/three.core.js', '/game.contract.json']) {
-    const response = await fetch(address + path); assert.equal(response.status, 200, path); assert.ok((await response.text()).length > 0);
-  }
-  assert.equal((await fetch(address + '/missing')).status, 404);
-} finally { server.kill(); }
-const sources = ['game.contract.json', 'src/game.mjs', 'src/validation.mjs', 'src/headless.mjs', 'src/browser.mjs', 'tests/game.test.mjs', 'tests/cli.test.mjs', 'scripts/autoplay.mjs', 'scripts/verify.mjs', 'scripts/build.mjs', 'index.html', 'style.css', 'package-lock.json'];
-const hashes = Object.fromEntries(sources.map(path => [path, createHash('sha256').update(readFileSync(path)).digest('hex')]));
-writeFileSync(resolve(proof, 'verification.json'), JSON.stringify({ node: process.version, machine: { platform: platform(), release: release(), cpu: cpus()[0]?.model }, cases, http: '8 checks passed', source_sha256: hashes, limits: ['Results apply to the machine recorded above; CI records its own environment', 'Browser QA recorded separately in browser-qa.json', 'Compare source SHA-256 with the intended phase tag'] }, null, 2) + '\n');
-console.log(`Verification passed: tests, build, ${cases.length} deterministic scenarios, HTTP smoke. Evidence: docs/proof/phase-1/`);
+const results=[];
+for(const item of cases){const out=resolve(proof,item.name+'.jsonl');const args=['src/headless.mjs','--seed','42','--night',String(item.night),'--scenario','tests/scenarios/phase-2/'+item.name+'.json','--ticks',String(item.ticks),'--snapshot-every','1','--out',out];if(item.inputs)args.push('--inputs','tests/scenarios/phase-2/'+item.name+'-inputs.json');command(args);const first=readFileSync(out,'utf8');command(args);assert.equal(readFileSync(out,'utf8'),first);const lines=first.trim().split('\n').map(JSON.parse),end=lines.at(-1),last=lines.filter(l=>l.type==='snapshot').at(-1);assert.equal(lines[0].tick,0);assert.equal(end.type,'end');assert.equal(end.state,item.state??'playing',item.name);assert.equal(end.ticks,item.endTick??item.ticks,item.name);item.check?.(last,lines);results.push({name:item.name,night:item.night,deterministic:true,result:end});}
+console.log('Replaying complete default Night 1 using ordinary inputs...');
+const tuning=JSON.parse(readFileSync('game.contract.json','utf8')).tuning,plan=planDefaultNight(tuning);assert.equal(plan.expected.state,'won','Input-only bot should complete default Night 1');
+writeFileSync(resolve(proof,'default-play-inputs.json'),JSON.stringify({frames:plan.frames})+'\n');
+const replayArgs=['src/headless.mjs','--seed',String(plan.seed),'--night','1','--inputs',resolve(proof,'default-play-inputs.json'),'--ticks','18000','--snapshot-every','60','--out',resolve(proof,'default-play.jsonl')];command(replayArgs);const replay=readFileSync(resolve(proof,'default-play.jsonl'),'utf8');command(replayArgs);assert.equal(readFileSync(resolve(proof,'default-play.jsonl'),'utf8'),replay);const replayLines=replay.trim().split('\n').map(JSON.parse);assert.deepEqual(replayLines.at(-1),plan.expected);assert.equal(replayLines.filter(l=>l.name==='lantern_lit').length,5);results.push({name:'default-play',night:1,seed:plan.seed,deterministic:true,result:plan.expected,scenario_override:false});
+console.log('Benchmarking full headless nights...');
+const benchmarks=[];const benchmarkScene=resolve(proof,'benchmark-scenario.json');writeFileSync(benchmarkScene,JSON.stringify({player:{flames:9999}})+'\n');
+for(const night of[1,2,3]){const ticks=tuning['night'+night+'_duration_s']*60;const out=resolve(proof,'benchmark-night-'+night+'.jsonl');const args=['src/headless.mjs','--seed','42','--night',String(night),'--scenario',benchmarkScene,'--ticks',String(ticks),'--snapshot-every','600','--out',out];const start=performance.now();command(args);const seconds=(performance.now()-start)/1000;assert.ok(seconds<=30,'Night '+night+' must complete in <=30 seconds');const end=readFileSync(out,'utf8').trim().split('\n').map(JSON.parse).at(-1);assert.equal(end.ticks,ticks);benchmarks.push({night,ticks,seconds,threshold_s:30,passed:true,command:[process.execPath,...args].join(' '),note:'Only health overridden to prevent early death; normal world and scheduled spawns run'});}
+console.log('Checking built modules over HTTP...');
+const server=spawn(process.execPath,['scripts/serve.mjs'],{env:{...process.env,PORT:'0'},stdio:['ignore','pipe','pipe']});
+const paths=['/','/style.css','/src/browser.mjs','/src/game.mjs','/src/world.mjs','/src/campaign.mjs','/src/audio.mjs','/vendor/three.module.js','/vendor/three.core.js','/game.contract.json','/LICENSE','/vendor/THREE-LICENSE.txt'];
+try{const address=await new Promise((ok,no)=>{const timer=setTimeout(()=>no(Error('HTTP start timeout')),10000);server.stdout.on('data',chunk=>{const m=chunk.toString().match(/http:\/\/localhost:(\d+)/);if(m){clearTimeout(timer);ok('http://127.0.0.1:'+m[1]);}});server.once('error',e=>{clearTimeout(timer);no(e);});server.once('exit',code=>{clearTimeout(timer);no(Error('HTTP server exited '+code));});});for(const path of paths){const r=await fetch(address+path);assert.equal(r.status,200,path);assert.ok((await r.text()).length>0);}assert.equal((await fetch(address+'/missing')).status,404);}finally{server.kill();}
+const sources=['game.contract.json','src/game.mjs','src/world.mjs','src/campaign.mjs','src/audio.mjs','src/validation.mjs','src/headless.mjs','src/browser.mjs','tests/game.test.mjs','tests/cli.test.mjs','scripts/autoplay.mjs','scripts/verify.mjs','scripts/build.mjs','scripts/browser-qa.mjs','index.html','style.css','package-lock.json'];
+const hashes=Object.fromEntries(sources.map(path=>[path,createHash('sha256').update(readFileSync(path)).digest('hex')]));
+writeFileSync(resolve(proof,'verification.json'),JSON.stringify({contract_version:'1.1',node:process.version,machine:{platform:platform(),release:release(),cpu:cpus()[0]?.model},cases:results,benchmarks,http:paths.length+1+' checks passed',source_sha256:hashes,limits:['Browser QA and FPS recorded separately','Windows local run; CI records its own environment','GUI campaign wins use scenarios; default Night 1 win above is input-only with no scenario override']},null,2)+'\n');
+console.log('Verification passed: tests, build, '+results.length+' deterministic cases, 3 full headless benchmarks, HTTP smoke.');

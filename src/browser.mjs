@@ -1,315 +1,119 @@
 import * as THREE from 'three';
-import { Game, DT, seededRandom, ISLAND_RADIUS } from './game.mjs';
-
-const $ = id => document.getElementById(id);
-const contract = await fetch('./game.contract.json').then(r => { if (!r.ok) throw new Error('Không tải được contract'); return r.json(); });
-const t = contract.tuning;
+import{Game,DT,seededRandom}from'./game.mjs';
+import{nightMap}from'./world.mjs';
+import{Campaign}from'./campaign.mjs';
+import{GameAudio}from'./audio.mjs';
+const $=id=>document.getElementById(id);
+const t=(await fetch('./game.contract.json').then(r=>{if(!r.ok)throw Error('Không tải được contract');return r.json();})).tuning;
+const palette={sky:'#0E1430',fog:'#1B2350',grass:'#2F5D50',sand:'#C9B48A',wood:'#6B4A2F',cloud:'#12384A',lit:'#FFB347',core:'#FFE9B0',unlit:'#5B5F6E',mote:'#FFF6C2',halo:'#FFE58A',shade:'#120A1A',outline:'#7A3CFF',stunned:'#3A3450',tunic:'#E8E2D0',red:'#C8102E',gold:'#F2C14E',drifter:'#8FA3B8',danger:'#FF5A5F',text:'#F5F1E6'};
 let renderer;
-try { renderer = new THREE.WebGLRenderer({ canvas: $('world'), antialias: true, powerPreference: 'high-performance' }); }
-catch { $('fatal').hidden = false; $('fatal').textContent = 'Trình duyệt chưa bật WebGL. Hãy bật hardware acceleration hoặc thử Chrome/Edge mới hơn. Chế độ headless vẫn chạy được bằng Node.js.'; throw new Error('WebGL unavailable'); }
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
-renderer.setSize(innerWidth, innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
-const scene = new THREE.Scene();
-scene.background = new THREE.Color('#13243b');
-scene.fog = new THREE.FogExp2('#182b40', .016);
-const camera = new THREE.PerspectiveCamera(52, innerWidth / innerHeight, .1, 240);
-const ambient = new THREE.HemisphereLight('#b8d8ef', '#213b36', 1.9);
-scene.add(ambient);
-const moonlight = new THREE.DirectionalLight('#bed8e9', 2.2);
-moonlight.position.set(-20, 35, -10);
-moonlight.castShadow = true;
-moonlight.shadow.mapSize.set(1024, 1024);
-Object.assign(moonlight.shadow.camera, { left: -36, right: 36, top: 36, bottom: -36, near: 1, far: 90 });
-moonlight.shadow.bias = -.0005;
-scene.add(moonlight);
-const warm = new THREE.PointLight('#ffba58', 2.4, 14, 1.5);
-scene.add(warm);
-const materials = {};
-const mat = (name, color, extra = {}) => materials[name] ??= new THREE.MeshStandardMaterial({ color, roughness: .85, flatShading: true, ...extra });
-const mesh = (geometry, material, parent, pos = [0, 0, 0]) => {
-  const item = new THREE.Mesh(geometry, material); item.position.fromArray(pos); item.castShadow = true; item.receiveShadow = true; parent.add(item); return item;
-};
-const cylinder = (top, bottom, height, sides, material, parent, pos) => mesh(new THREE.CylinderGeometry(top, bottom, height, sides), material, parent, pos);
-const glowMaterial = new THREE.MeshBasicMaterial({ color: '#ffe29a', transparent: true, opacity: .13, depthWrite: false });
-
-// All scenery is visual only; the shared simulation owns positions and collisions.
-cylinder(29, 26.8, 2.4, 80, mat('island', '#3d6255'), scene, [0, -1.2, 0]);
-cylinder(26.8, 14, 7, 17, mat('rock', '#253c47'), scene, [0, -5.7, 0]);
-cylinder(14, 4, 6, 13, mat('rockdeep', '#1c2e3e'), scene, [0, -12, 0]);
-const grass = cylinder(28.8, 28.8, .08, 80, mat('grass', '#496d59'), scene, [0, .01, 0]);
-const visualRandom = seededRandom(702);
-for (let i = 0; i < 48; i++) {
-  const angle = visualRandom() * Math.PI * 2, radius = 6 + visualRandom() * 20;
-  const x = Math.cos(angle) * radius, z = Math.sin(angle) * radius;
-  const rock = mesh(new THREE.DodecahedronGeometry(.25 + visualRandom() * .6, 0), mat('stone', '#759187'), scene, [x, .12, z]);
-  rock.scale.y = .55;
-  if (i % 3 === 0) {
-    const tuft = new THREE.Group(); tuft.position.set(x + .8, 0, z); scene.add(tuft);
-    for (let j = 0; j < 3; j++) {
-      const blade = mesh(new THREE.ConeGeometry(.09, .6 + visualRandom() * .5, 3), mat('tuft', '#719174'), tuft, [(j - 1) * .16, .25, 0]);
-      blade.rotation.z = (j - 1) * .3;
-    }
+try{renderer=new THREE.WebGLRenderer({canvas:$('world'),antialias:true,powerPreference:'high-performance'});}catch(e){$('fatal').hidden=false;$('fatal').textContent='Không mở được WebGL. Hãy bật hardware acceleration hoặc dùng Chrome/Edge mới hơn.';throw e;}
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;
+const gl=renderer.getContext(),gpuExtension=gl.getExtension('WEBGL_debug_renderer_info');
+const gpuName=gpuExtension?gl.getParameter(gpuExtension.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER);
+const scene=new THREE.Scene();scene.background=new THREE.Color(palette.sky);scene.fog=new THREE.FogExp2(palette.fog,.009);
+const camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.1,250);
+const ambient=new THREE.HemisphereLight('#e4eaff','#405c51',.15);scene.add(ambient);
+const moon=new THREE.DirectionalLight('#bfd2f0',.85);moon.position.set(-20,35,-15);scene.add(moon);
+const warm=new THREE.PointLight(palette.lit,6,12,1.5);scene.add(warm);
+const world=new THREE.Group(),actors=new THREE.Group();scene.add(world,actors);
+const materials=new Map();
+function mat(color,basic=false,extra={}){const key=color+basic+JSON.stringify(extra);if(!materials.has(key))materials.set(key,basic?new THREE.MeshBasicMaterial({color,...extra}):new THREE.MeshStandardMaterial({color,roughness:1,flatShading:true,...extra}));return materials.get(key);}
+function mesh(geometry,material,parent,pos=[0,0,0]){const m=new THREE.Mesh(geometry,material);m.position.fromArray(pos);parent.add(m);return m;}
+const cyl=(r1,r2,h,n,m,parent,pos)=>mesh(new THREE.CylinderGeometry(r1,r2,h,n),m,parent,pos);
+const disposableMaterial=m=>![...materials.values()].includes(m);
+function clearGroup(group,dispose=true){if(dispose)group.traverse(o=>{if(o.isMesh||o.isPoints){o.geometry.dispose();if(o.material&&disposableMaterial(o.material))o.material.dispose();}});group.clear();}
+function instances(geometry,material,positions,parent,scale=[1,1,1]){const obj=new THREE.InstancedMesh(geometry,material,positions.length);const dummy=new THREE.Object3D();positions.forEach((p,i)=>{dummy.position.fromArray(p);dummy.scale.fromArray(scale);dummy.updateMatrix();obj.setMatrixAt(i,dummy.matrix);});obj.instanceMatrix.needsUpdate=true;parent.add(obj);return obj;}
+function buildWorld(map,night){
+  clearGroup(world);
+  for(const island of map.islands){
+    cyl(island.radius,island.radius-3,2,64,mat(palette.grass),world,[island.x,-1,island.z]);
+    cyl(island.radius-3,island.radius*.35,8,15,mat('#1a2d40'),world,[island.x,-6,island.z]);
+    const treePositions=[],crowns=[],stones=[];const rand=seededRandom(707+island.x);
+    for(let i=0;i<12;i++){const a=i/12*Math.PI*2,r=island.radius-2;treePositions.push([island.x+Math.sin(a)*r,1.1,island.z+Math.cos(a)*r]);crowns.push([island.x+Math.sin(a)*r,3,island.z+Math.cos(a)*r]);}
+    for(let i=0;i<30;i++){const a=rand()*Math.PI*2,r=5+rand()*(island.radius-8);stones.push([island.x+Math.sin(a)*r,.12,island.z+Math.cos(a)*r]);}
+    instances(new THREE.CylinderGeometry(.1,.2,2.2,5),mat(palette.wood),treePositions,world);
+    instances(new THREE.IcosahedronGeometry(1.4,0),mat('#294f49'),crowns,world,[1,1.3,1]);
+    instances(new THREE.DodecahedronGeometry(.4,0),mat(palette.sand),stones,world,[1,.45,1]);
   }
-}
-for (let i = 0; i < 11; i++) {
-  const angle = i / 11 * Math.PI * 2, radius = 25 + visualRandom() * 1.5;
-  const tree = new THREE.Group(); tree.position.set(Math.sin(angle) * radius, 0, Math.cos(angle) * radius); scene.add(tree);
-  cylinder(.13, .25, 2.2, 6, mat('bark', '#4b5149'), tree, [0, 1.1, 0]);
-  const crown = mesh(new THREE.IcosahedronGeometry(1.7, 0), mat('leaves', '#365a54'), tree, [0, 3, 0]); crown.scale.set(1, 1.35, 1);
-  mesh(new THREE.IcosahedronGeometry(1.2, 0), mat('leaves2', '#426c60'), tree, [.7, 2.2, .3]);
-}
-const cloudMat = new THREE.MeshStandardMaterial({ color: '#657887', roughness: 1, flatShading: true, transparent: true, opacity: .4 });
-for (let i = 0; i < 50; i++) {
-  const angle = visualRandom() * Math.PI * 2, radius = 34 + visualRandom() * 55;
-  const cloud = mesh(new THREE.IcosahedronGeometry(4 + visualRandom() * 6, 1), cloudMat, scene, [Math.sin(angle) * radius, -7 - visualRandom() * 5, Math.cos(angle) * radius]);
-  cloud.scale.y = .25; cloud.castShadow = false;
-}
-const starPositions = [];
-for (let i = 0; i < 450; i++) {
-  const a = visualRandom() * Math.PI * 2, y = 20 + visualRandom() * 90;
-  starPositions.push(Math.cos(a) * 100, y, Math.sin(a) * 100);
-}
-const starGeometry = new THREE.BufferGeometry(); starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
-scene.add(new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: '#d3e8e3', size: .18, transparent: true, opacity: .65 })));
-mesh(new THREE.SphereGeometry(2.3, 24, 16), new THREE.MeshBasicMaterial({ color: '#f1dcb7' }), scene, [-48, 43, 48]);
-
-const may = new THREE.Group(); scene.add(may);
-const tunic = mat('tunic', '#db9b56'), dark = mat('clothes', '#28545b'), skin = mat('skin', '#e8bf8b');
-cylinder(.3, .44, .8, 8, tunic, may, [0, .85, 0]);
-mesh(new THREE.SphereGeometry(.27, 10, 8), skin, may, [0, 1.42, .015]);
-const hat = mesh(new THREE.ConeGeometry(.72, .36, 24), mat('hat', '#e3ce8c'), may, [0, 1.75, 0]);
-cylinder(.7, .7, .035, 24, mat('hatedge', '#b49557'), may, [0, 1.57, 0]);
-const limbs = [];
-for (const side of [-1, 1]) {
-  const leg = cylinder(.11, .13, .55, 6, dark, may, [side * .18, .3, 0]); limbs.push(leg);
-  cylinder(.085, .1, .55, 6, tunic, may, [side * .44, .9, 0]);
-}
-mesh(new THREE.BoxGeometry(.65, .15, .12), dark, may, [0, 1.2, .27]);
-const smallLantern = mesh(new THREE.SphereGeometry(.15, 8, 8), mat('smallLight', '#ffd48a', { emissive: '#ffb340', emissiveIntensity: 2 }), may, [.55, 1.05, .2]);
-const pulseRing = mesh(new THREE.RingGeometry(.92, 1, 64), new THREE.MeshBasicMaterial({ color: '#ffe09a', transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }), scene);
-pulseRing.rotation.x = -Math.PI / 2;
-pulseRing.castShadow = false;
-
-const actors = new THREE.Group(); scene.add(actors);
-const lanternViews = new Map(), shadeViews = new Map(), moteViews = new Map();
-const moteGeometry = new THREE.SphereGeometry(.09, 5, 4), moteMat = new THREE.MeshBasicMaterial({ color: '#ffdd85' });
-const shadeGeometry = new THREE.IcosahedronGeometry(.68, 1);
-function createLantern(lantern) {
-  const group = new THREE.Group(); group.position.fromArray(lantern.pos); actors.add(group);
-  cylinder(.7, .85, .16, 8, mat('base', '#8b927e'), group, [0, .1, 0]);
-  cylinder(.12, .17, 3, 8, mat('post', '#716149'), group, [0, 1.55, 0]);
-  const cageMaterial = new THREE.MeshStandardMaterial({ color: '#897358', emissive: '#ffb64b', emissiveIntensity: .05, roughness: .6 });
-  const cage = mesh(new THREE.SphereGeometry(.65, 12, 10), cageMaterial, group, [0, 3.1, 0]); cage.scale.y = 1.3;
-  cylinder(.5, .5, .1, 10, mat('lanterncap', '#694c3c'), group, [0, 3.92, 0]);
-  mesh(new THREE.ConeGeometry(.85, .38, 8), mat('roof', '#805642'), group, [0, 4.17, 0]);
-  cylinder(.4, .4, .1, 10, materials.lanterncap, group, [0, 2.34, 0]);
-  const halo = mesh(new THREE.SphereGeometry(1.1, 12, 10), glowMaterial, group, [0, 3.1, 0]); halo.visible = false;
-  halo.castShadow = false;
-  const pool = mesh(new THREE.CircleGeometry(t.safe_radius, 64), new THREE.MeshBasicMaterial({ color: '#ffc05c', transparent: true, opacity: .1, depthWrite: false }), group, [0, .075, 0]); pool.rotation.x = -Math.PI / 2; pool.visible = false;
-  pool.castShadow = false;
-  const light = new THREE.PointLight('#ffb54c', 0, 13, 1.4); light.position.set(0, 3.1, 0); group.add(light);
-  return { group, cageMaterial, halo, pool, light };
-}
-function createShade() {
-  const group = new THREE.Group(); actors.add(group);
-  const material = new THREE.MeshStandardMaterial({ color: '#342540', emissive: '#6c3697', emissiveIntensity: .4, flatShading: true, transparent: true, opacity: .93 });
-  mesh(shadeGeometry, material, group, [0, .8, 0]);
-  for (const side of [-1, 1]) mesh(new THREE.SphereGeometry(.09, 6, 4), mat('eye', '#d695f6', { emissive: '#c77eff', emissiveIntensity: 2 }), group, [side * .23, .94, .55]);
-  const tail = mesh(new THREE.ConeGeometry(.5, 1.1, 5), material, group, [0, .15, 0]); tail.rotation.z = Math.PI;
-  return { group, material };
-}
-let game, playing = false, paused = false, yaw = 0, cameraDistance = 11, accumulator = 0, previousTime = 0, pulseTime = -10, toastUntil = 0;
-let audio, soundOn = false, lastMoveAngle = 0;
-const keys = new Set();
-function notify(message, duration = 2.6) { $('toast').textContent = message; $('toast').classList.add('visible'); toastUntil = performance.now() + duration * 1000; }
-function tone(frequency, duration = .12) {
-  if (!soundOn || !audio) return;
-  const oscillator = audio.createOscillator(), gain = audio.createGain();
-  oscillator.type = 'sine'; oscillator.frequency.value = frequency;
-  gain.gain.setValueAtTime(.06, audio.currentTime); gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + duration);
-  oscillator.connect(gain); gain.connect(audio.destination); oscillator.start(); oscillator.stop(audio.currentTime + duration);
-}
-function clearActors() {
-  for (const map of [lanternViews, shadeViews, moteViews]) {
-    for (const view of map.values()) {
-      const group = view.group ?? view;
-      actors.remove(group);
-      if (view.cageMaterial) view.cageMaterial.dispose();
-      if (view.material) view.material.dispose();
-    }
-    map.clear();
+  if(night===2){mesh(new THREE.BoxGeometry(18,.2,4),mat(palette.wood),world,[35,-.1,0]);const planks=Array.from({length:18},(_,i)=>[26.5+i,.02,0]);instances(new THREE.BoxGeometry(.85,.04,4),mat(palette.sand),planks,world);}
+  if(night===3){
+    const top=mesh(new THREE.RingGeometry(12,24,64,1,0,Math.PI),mat(palette.grass,false,{side:THREE.DoubleSide}),world,[0,3,0]);top.rotation.x=Math.PI/2;
+    for(const radius of[12,24])mesh(new THREE.CylinderGeometry(radius,radius,3,64,1,true,-Math.PI/2,Math.PI),mat(palette.wood,false,{side:THREE.DoubleSide}),world,[0,1.5,0]);
+    cyl(8,8,6,64,mat(palette.grass),world,[0,3,0]);
+    for(const degrees of[30,150]){const a=degrees*Math.PI/180;const ramp=mesh(new THREE.BoxGeometry(3,.15,Math.sqrt(45)),mat(palette.sand),world,[27*Math.cos(a),1.5,27*Math.sin(a)]);ramp.rotation.set(Math.atan(.5),Math.PI/2-a,0,'YXZ');}
+    cyl(2,2,8,12,mat(palette.wood),world,[0,10,0]);cyl(2.7,2.7,.2,12,mat(palette.gold),world,[0,14,0]);mesh(new THREE.ConeGeometry(3.2,1.8,8),mat(palette.red),world,[0,15,0]);
+    mesh(new THREE.SphereGeometry(.7,10,8),mat(palette.gold),world,[0,12,1.8]);
   }
+  for(const pad of map.pads){cyl(1,1,.12,20,mat(palette.gold,true),world,[pad.pos[0],pad.pos[1]+.06,pad.pos[2]]);const ring=mesh(new THREE.TorusGeometry(1,.06,3,24),mat(palette.halo,true),world,[pad.pos[0],pad.pos[1]+.13,pad.pos[2]]);ring.rotation.x=Math.PI/2;}
+  const rand=seededRandom(441);const clouds=[];for(let i=0;i<30;i++){const a=rand()*Math.PI*2,r=50+rand()*55;clouds.push([Math.cos(a)*r+(night===2?25:0),-7-rand()*3,Math.sin(a)*r]);}
+  instances(new THREE.IcosahedronGeometry(6,1),mat(palette.cloud,true),clouds,world,[1,.22,1]);
+  const starPositions=[];for(let i=0;i<350;i++){const a=rand()*Math.PI*2;starPositions.push(Math.cos(a)*110,18+rand()*80,Math.sin(a)*110);}
+  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(starPositions,3));world.add(new THREE.Points(geometry,new THREE.PointsMaterial({color:palette.text,size:.16})));
+  mesh(new THREE.SphereGeometry(2,16,10),mat(palette.core,true),world,[-45,42,50]);
 }
-function reset() {
-  clearActors(); game = new Game(t, 202603630); accumulator = 0; keys.clear(); yaw = 0; pulseTime = -10;
-  for (const lantern of game.lanterns) lanternViews.set(lantern.id, createLantern(lantern));
-  updateHud(); syncView(0);
+const may=new THREE.Group();scene.add(may);
+cyl(.3,.43,.8,8,mat(palette.tunic),may,[0,.85,0]);mesh(new THREE.SphereGeometry(.27,10,8),mat('#d5ab86'),may,[0,1.42,0]);
+mesh(new THREE.ConeGeometry(.72,.36,24),mat(palette.sand),may,[0,1.75,0]);cyl(.7,.7,.035,24,mat(palette.gold),may,[0,1.57,0]);
+const legs=[];for(const side of[-1,1]){legs.push(cyl(.11,.13,.55,6,mat('#263748'),may,[side*.18,.3,0]));cyl(.085,.1,.55,6,mat(palette.tunic),may,[side*.44,.9,0]);}
+mesh(new THREE.BoxGeometry(.65,.15,.14),mat(palette.red),may,[0,1.2,.27]);mesh(new THREE.SphereGeometry(.15,8,6),mat(palette.lit,true),may,[.55,1.05,.2]);
+const pulseRing=mesh(new THREE.RingGeometry(.94,1,48),mat(palette.core,true,{transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}),scene);pulseRing.rotation.x=-Math.PI/2;
+const moteCores=new THREE.InstancedMesh(new THREE.SphereGeometry(.12,5,4),mat(palette.mote,true),128),moteHalos=new THREE.InstancedMesh(new THREE.SphereGeometry(.25,5,4),mat(palette.halo,true,{transparent:true,opacity:.13,depthWrite:false}),128);scene.add(moteCores,moteHalos);
+const leaves=new THREE.InstancedMesh(new THREE.OctahedronGeometry(.13,0),mat(palette.gold,true),18);scene.add(leaves);leaves.count=0;
+const lanternViews=new Map(),shadeViews=new Map(),drifterViews=new Map(),charmViews=new Map();
+function lanternView(l){const group=new THREE.Group();group.position.fromArray(l.pos);actors.add(group);cyl(.65,.8,.18,8,mat(palette.sand),group,[0,.09,0]);cyl(.12,.16,3,6,mat(palette.wood),group,[0,1.5,0]);const material=new THREE.MeshBasicMaterial({color:palette.unlit});const body=mesh(new THREE.SphereGeometry(.6,10,8),material,group,[0,3.1,0]);body.scale.y=1.3;mesh(new THREE.ConeGeometry(.85,.35,8),mat(palette.wood),group,[0,4.1,0]);const pool=mesh(new THREE.CircleGeometry(6,40),mat(palette.lit,true,{transparent:true,opacity:.1,depthWrite:false}),group,[0,.035,0]);pool.rotation.x=-Math.PI/2;pool.visible=false;const light=new THREE.PointLight(palette.lit,0,15,1.4);light.position.set(0,3.1,0);group.add(light);return{group,material,pool,light};}
+function shadeView(){const group=new THREE.Group();actors.add(group);const material=new THREE.MeshBasicMaterial({color:palette.shade});const body=mesh(new THREE.IcosahedronGeometry(.65,1),material,group);body.scale.y=1.2;const outline=mesh(new THREE.IcosahedronGeometry(.68,1),mat(palette.outline,true,{side:THREE.BackSide}),group);outline.scale.y=1.2;for(const x of[-.22,.22])mesh(new THREE.SphereGeometry(.08,5,4),mat(palette.text,true),group,[x,.14,.55]);return{group,material};}
+function drifterView(){const group=new THREE.Group();actors.add(group);const strip=mesh(new THREE.TorusGeometry(.7,.12,3,16,Math.PI*1.7),mat(palette.drifter,true,{side:THREE.DoubleSide}),group);strip.scale.y=.35;return{group};}
+function charmView(c){const group=new THREE.Group();actors.add(group);mesh(new THREE.BoxGeometry(.55,.9,.08),mat(palette.gold,true),group);mesh(new THREE.BoxGeometry(.43,.77,.1),mat(palette.red,true),group,[0,0,.02]);return{group};}
+function clearActors(){actors.traverse(o=>{if(o.isMesh)o.geometry.dispose();});for(const map of[lanternViews,shadeViews])for(const view of map.values())view.material?.dispose();actors.clear();for(const map of[lanternViews,shadeViews,drifterViews,charmViews])map.clear();}
+let settings={volume:.35,sensitivity:1};try{const saved=JSON.parse(localStorage.getItem('dao-den-long-settings')??'null');if(saved)settings={volume:Math.max(0,Math.min(1,Number(saved.volume)||0)),sensitivity:Math.max(.2,Math.min(2.4,Number(saved.sensitivity)||1))};}catch{}
+const audio=new GameAudio(settings.volume),campaign=new Campaign(t);let game,settingsFrom='menu',yaw=0,cameraDistance=12,accumulator=0,previousTime=performance.now(),pulseTime=-100,toastUntil=0,queuedPause=false,lastSecond=-1,windWarned=false;
+const keys=new Set(),frameTimes=[];
+for(let i=0;i<10;i++)$('carry-slots').appendChild(document.createElement('i'));
+function notify(text){$('toast').textContent=text;$('toast').classList.add('visible');toastUntil=performance.now()+2800;}
+function bindGame(next){game=next;clearActors();buildWorld(game.map,game.night);for(const l of game.lanterns)lanternViews.set(l.id,lanternView(l));for(const c of game.charms)charmViews.set(c.id,charmView(c));keys.clear();queuedPause=false;yaw=0;accumulator=0;pulseTime=-100;lastSecond=-1;windWarned=false;camera.position.set(game.player.pos[0],game.player.pos[1]+10,game.player.pos[2]-14);frameTimes.length=0;}
+function showOverlay(){
+  const screen=campaign.screen;$('overlay').hidden=screen==='playing';$('settings-panel').hidden=screen!=='settings';if(screen==='settings'){$('overlay').hidden=true;return;}
+  $('intro-rules').hidden=screen!=='menu';for(const id of['retry','panel-settings','menu'])$(id).hidden=true;
+  const map=game?.map??nightMap(1);
+  if(screen==='menu'){$('panel-eyebrow').textContent='BA HÒN ĐẢO · MỘT NGƯỜI GIỮ ĐÈN';$('panel-title').innerHTML='Đêm còn dài.<br><em>Đèn còn đợi.</em>';$('panel-description').textContent='Cùng Mây gom đom đóm, vượt biển mây và thắp lại những Đèn Lồng Lớn trước bình minh.';$('play').textContent='Bắt đầu hành trình';$('panel-settings').hidden=false;}
+  if(screen==='intro'){$('panel-eyebrow').textContent='ĐÊM '+campaign.night+' · '+map.name.toLocaleUpperCase('vi-VN');$('panel-title').innerHTML=map.name+'.<br><em>Ánh sáng đang đợi.</em>';const words=['Mỗi đốm sáng đều tìm được một mái nhà. Hãy mang chúng về những ngọn đèn, Mây nhé.','Cầu tre bắc qua mây. Bục vàng sẽ đưa con qua đảo, nhưng hãy coi chừng Gió Lạc.','Khi chuông thức giấc, bình minh sẽ trở về. Đi theo dốc và bục nhảy để lên tầng cao.'];$('panel-description').textContent='Ông Đăng: “'+words[campaign.night-1]+'”';$('play').textContent='Lên đường';$('menu').hidden=false;}
+  if(screen==='pause'){$('panel-eyebrow').textContent='NGHỈ CHÂN DƯỚI ÁNH ĐÈN';$('panel-title').innerHTML='Đảo vẫn đợi.<br><em>Cứ thong thả.</em>';$('panel-description').textContent='Đồng hồ và mọi chuyển động đang tạm dừng.';$('play').textContent='Tiếp tục';for(const id of['retry','panel-settings','menu'])$(id).hidden=false;}
+  if(screen==='result'||screen==='dawn'){const won=game.state==='won';$('panel-eyebrow').textContent=screen==='dawn'?'BA HÒN ĐẢO ĐÃ THỨC GIẤC':won?'ÁNH SÁNG ĐÃ TRỞ VỀ':'MỖI ĐÊM LÀ MỘT CƠ HỘI MỚI';$('panel-title').innerHTML=screen==='dawn'?'Bình Minh.<br><em>Cảm ơn Mây.</em>':won?'Đảo đã sáng.<br><em>Đi tiếp nhé.</em>':'Đêm khép lại.<br><em>Thử lại nhé.</em>';$('panel-description').textContent='Điểm Đêm '+game.night+': '+game.score.toLocaleString('vi-VN')+'. Tổng điểm các Đêm đã thắng: '+campaign.total.toLocaleString('vi-VN')+'.';$('play').textContent=screen==='dawn'?'Hành trình mới':won?'Đêm kế tiếp':'Chơi lại Đêm '+game.night;$('menu').hidden=false;}
 }
-function start() {
-  if (!game || game.state !== 'playing') reset();
-  playing = true; paused = false; accumulator = 0; previousTime = performance.now();
-  $('overlay').hidden = true; $('pause').textContent = 'Tạm dừng';
-  notify('Đèn cần 8 đom đóm. Nhặt rồi nhấn E bên đèn.');
-  $('world').focus();
+async function primary(){await audio.unlock().catch(()=>{});switch(campaign.screen){case'menu':bindGame(campaign.begin());break;case'intro':campaign.play();audio.music(true);keys.clear();$('world').focus();notify('Đèn cần 10 đom đóm. Q tỏa sáng; Shift lướt.');break;case'pause':queuedPause=true;return;case'result':bindGame(game.state==='won'?campaign.next():campaign.retry());break;case'dawn':bindGame(campaign.begin());break;}showOverlay();}
+function pause(){if(campaign.screen==='playing'||campaign.screen==='pause')queuedPause=true;}
+function retry(){audio.music(false);bindGame(campaign.retry());showOverlay();}
+function menu(){audio.music(false);keys.clear();campaign.menu();$('settings-panel').hidden=true;showOverlay();}
+function openSettings(){settingsFrom=campaign.screen;if(campaign.screen==='playing'){queuedPause=true;settingsFrom='pause';}campaign.screen='settings';keys.clear();audio.music(false);$('volume').value=settings.volume;$('sensitivity').value=settings.sensitivity;updateSettings();showOverlay();}
+function updateSettings(){settings.volume=Number($('volume').value);settings.sensitivity=Number($('sensitivity').value);audio.setVolume(settings.volume);$('volume-value').textContent=Math.round(settings.volume*100)+'%';$('sensitivity-value').textContent=settings.sensitivity.toFixed(1);try{localStorage.setItem('dao-den-long-settings',JSON.stringify(settings));}catch{}}
+function handleEvents(list){for(const e of list){audio.effect(e.name);if(e.name==='deposit')notify('Đã nạp '+e.data.amount+' đom đóm vào '+e.data.lantern_id);if(e.name==='lantern_lit')notify('Đèn đã sáng. Vùng an toàn bảo vệ Mây!');if(e.name==='pulse')pulseTime=performance.now()/1000;if(e.name==='player_hit')notify(e.data.by==='fall'?'Mây rơi khỏi đảo. Đợi một chút để trở về.':'Bóng Mực chạm vào Mây!');if(e.name==='drifter_steal')notify('Gió Lạc cướp '+e.data.amount+' đom đóm. Tỏa sáng để lấy lại!');if(e.name==='charm_picked')notify('Bùa Gió! Chạy nhanh và lướt không hồi chiêu trong 10 giây.');if(e.name==='paused'){if(campaign.screen!=='settings')campaign.screen='pause';audio.music(false);keys.clear();showOverlay();}if(e.name==='resumed'){campaign.screen='playing';audio.music(true);keys.clear();showOverlay();$('world').focus();}if(e.name==='game_over'){campaign.complete();audio.music(false);audio.effect(game.state);keys.clear();showOverlay();}}}
+function updateHud(){const p=game.player;const count=game.lanterns.filter(l=>l.lit).length,total=game.lanterns.length;$('night-label').textContent='ĐÊM '+game.night+' / '+game.map.name.toLocaleUpperCase('vi-VN');$('map-name').textContent=game.map.name.toLocaleUpperCase('vi-VN');$('health').textContent=Array.from({length:3},(_,i)=>i<p.flames?'♦':'♢').join(' ');$('health').setAttribute('aria-label',p.flames+' máu');$('carried').textContent=p.carried+' / 10';$('carry-slots').setAttribute('aria-label',p.carried+' trên 10 đom đóm');[...$('carry-slots').children].forEach((el,i)=>el.classList.toggle('filled',i<p.carried));const seconds=Math.ceil(game.timeLeft);$('timer').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');$('timer').parentElement.classList.toggle('danger',game.timeLeft<=30);$('score').textContent=game.score.toLocaleString('vi-VN');$('lantern-count').textContent=count+' / '+total+' ĐÈN';$('objective').textContent=count>0?'Ánh sáng đã trở về '+count+' góc đảo. Còn '+(total-count)+' đèn chờ Mây.':'Gom những đốm sáng nhỏ. Thắp lại đêm.';const dash=p.dashCd/60,pulse=p.pulseCd/60;$('dash-status').textContent=dash>0?dash.toFixed(1)+'s':'Sẵn sàng';$('pulse-status').textContent=pulse>0?pulse.toFixed(1)+'s':'3 đom đóm';$('dash-ability').classList.toggle('cooldown',dash>0);$('pulse-ability').classList.toggle('cooldown',pulse>0);$('charm-status').hidden=p.charmTicks<=0;$('charm-status').textContent='BÙA GIÓ · '+(p.charmTicks/60).toFixed(1)+'s';
+  const nearest=game.lanterns.filter(l=>!l.lit).sort((a,b)=>Math.hypot(a.pos[0]-p.pos[0],a.pos[2]-p.pos[2])-Math.hypot(b.pos[0]-p.pos[0],b.pos[2]-p.pos[2]))[0];const distance=nearest?Math.hypot(nearest.pos[0]-p.pos[0],nearest.pos[2]-p.pos[2]):Infinity;$('interaction').hidden=campaign.screen!=='playing'||distance>2;if(nearest)$('interaction').lastElementChild.textContent='Nạp ánh sáng ('+nearest.deposited+'/10)';$('compass').hidden=true;if(nearest&&campaign.screen==='playing'){const projected=new THREE.Vector3(nearest.pos[0],nearest.pos[1]+2,nearest.pos[2]).project(camera);if(Math.abs(projected.x)>.9||Math.abs(projected.y)>.8||projected.z>1){$('compass').hidden=false;const behind=projected.z>1?-1:1;$('compass-arrow').style.transform='rotate('+Math.atan2(projected.x*behind,projected.y*behind)*180/Math.PI+'deg)';$('compass-label').textContent=nearest.id+' · '+Math.round(distance)+' m';}}
+  $('wind-warning').hidden=!(game.wind.warning||game.wind.active)||campaign.screen!=='playing';$('wind-warning').textContent=game.wind.active?'Gió mạnh! Chú ý mép đảo.':'Lá đang đổi hướng. Gió sắp đến…';if(game.wind.warning&&!windWarned){audio.effect('wind');windWarned=true;}if(!game.wind.warning)windWarned=false;if(campaign.screen==='playing'&&seconds<=10&&seconds!==lastSecond)audio.effect('countdown');lastSecond=seconds;
 }
-function togglePause(force) {
-  if (!playing || game.state !== 'playing') return;
-  paused = force ?? !paused; keys.clear(); accumulator = 0;
-  $('pause').textContent = paused ? 'Tiếp tục' : 'Tạm dừng';
-  $('overlay').hidden = !paused;
-  if (paused) {
-    $('panel-eyebrow').textContent = 'NGHỈ CHÂN DƯỚI ÁNH ĐÈN';
-    $('panel-title').innerHTML = 'Đảo vẫn đợi.<br><em>Cứ thong thả.</em>';
-    $('panel-description').textContent = 'Game đang tạm dừng. Đồng hồ sẽ chạy tiếp khi bạn trở lại.';
-    $('intro-rules').hidden = true; $('play').textContent = 'Tiếp tục hành trình';
-  } else $('world').focus();
+const mapContext=$('map').getContext('2d');
+function drawMap(){const c=mapContext;c.clearRect(0,0,220,220);c.fillStyle='#0e1430aa';c.beginPath();c.arc(110,110,105,0,Math.PI*2);c.fill();const scale=game.night===2?1.55:2.1,cx=game.night===2?35:0;const point=p=>[110-(p[0]-cx)*scale,110-p[2]*scale];for(const island of game.map.islands){const [x,z]=point([island.x,0,island.z]);c.fillStyle=palette.grass;c.strokeStyle='#8fa3b866';c.beginPath();c.arc(x,z,island.radius*scale,0,Math.PI*2);c.fill();c.stroke();}if(game.night===2){c.fillStyle=palette.wood;const a=point([44,0,2]);c.fillRect(a[0],a[1],18*scale,4*scale);}const dot=(p,r,color)=>{const[x,z]=point(p);c.fillStyle=color;c.beginPath();c.arc(x,z,r,0,Math.PI*2);c.fill();};for(const m of game.motes)dot(m.pos,1.5,palette.halo);for(const l of game.lanterns){if(l.lit)dot(l.pos,6*scale,'#ffb34733');dot(l.pos,4,l.lit?palette.lit:palette.unlit);}for(const s of game.shades)dot(s.pos,2.5,palette.outline);for(const d of game.drifters)dot(d.pos,3,palette.drifter);for(const ch of game.charms)if(ch.available)dot(ch.pos,3,palette.red);dot(game.player.pos,4,palette.text);}
+const dummy=new THREE.Object3D();
+function syncView(now){const p=game.player,time=now/1000;may.position.fromArray(p.pos);may.rotation.y=Math.atan2(p.facing[0],p.facing[1]);may.visible=!(p.invulnTicks>0&&Math.floor(time*12)%2===0)&&p.respawnTicks===0;legs.forEach((l,i)=>{l.rotation.x=Math.hypot(p.vel[0],p.vel[2])>0?Math.sin(time*13+i*Math.PI)*.55:0;});warm.position.set(p.pos[0],p.pos[1]+2,p.pos[2]);let lit=0;for(const l of game.lanterns){const v=lanternViews.get(l.id);v.material.color.set(l.lit?palette.lit:palette.unlit);v.pool.visible=l.lit;v.light.intensity=l.lit?12:0;if(l.lit)lit++;}ambient.intensity=.15+.55*lit/game.lanterns.length;
+  moteCores.count=moteHalos.count=Math.min(128,game.motes.length);for(let i=0;i<moteCores.count;i++){const m=game.motes[i];dummy.position.set(m.pos[0],m.pos[1]+.5+Math.sin(time*2+i)*.15,m.pos[2]);dummy.scale.setScalar(1);dummy.updateMatrix();moteCores.setMatrixAt(i,dummy.matrix);moteHalos.setMatrixAt(i,dummy.matrix);}moteCores.instanceMatrix.needsUpdate=true;moteHalos.instanceMatrix.needsUpdate=true;
+  for(const s of game.shades){let v=shadeViews.get(s.id);if(!v){v=shadeView();shadeViews.set(s.id,v);}v.group.position.set(s.pos[0],s.pos[1]+Math.sin(time*3+s.pos[0])*.08,s.pos[2]);v.group.rotation.y=Math.atan2(p.pos[0]-s.pos[0],p.pos[2]-s.pos[2]);v.group.scale.setScalar(s.state==='spawning'?.5+Math.sin(time*5)*.1:1);v.material.color.set(s.state==='stunned'?palette.stunned:palette.shade);}
+  const live=new Set(game.drifters.map(d=>d.id));for(const[id,v]of drifterViews)if(!live.has(id)){actors.remove(v.group);v.group.traverse(o=>o.geometry?.dispose());drifterViews.delete(id);}for(const d of game.drifters){let v=drifterViews.get(d.id);if(!v){v=drifterView();drifterViews.set(d.id,v);}v.group.position.set(d.pos[0],d.pos[1]+.4+Math.sin(time*4)*.15,d.pos[2]);v.group.rotation.y=time+d.pos[0];}
+  for(const c of game.charms){const v=charmViews.get(c.id);if(!v)continue;v.group.visible=c.available;v.group.position.set(c.pos[0],c.pos[1]+.8+Math.sin(time*2)*.1,c.pos[2]);v.group.rotation.y=time*.8;}
+  const age=time-pulseTime;pulseRing.material.opacity=age>=0&&age<.55?(1-age/.55)*.8:0;pulseRing.scale.setScalar(Math.max(.01,Math.min(5,age/.55*5)));pulseRing.position.set(p.pos[0],p.pos[1]+.15,p.pos[2]);
+  leaves.count=game.wind.warning||game.wind.active?18:0;for(let i=0;i<leaves.count;i++){const phase=(time*2+i*.9)%10;dummy.position.set(p.pos[0]+phase-5,p.pos[1]+1.2+Math.sin(time+i),p.pos[2]+Math.sin(i)*5);dummy.rotation.set(time+i,time,0);dummy.scale.set(1,.3,1);dummy.updateMatrix();leaves.setMatrixAt(i,dummy.matrix);}leaves.instanceMatrix.needsUpdate=true;
+  const target=new THREE.Vector3(p.pos[0]-Math.sin(yaw)*cameraDistance,p.pos[1]+cameraDistance*.68,p.pos[2]-Math.cos(yaw)*cameraDistance);camera.position.lerp(target,.18);camera.lookAt(p.pos[0]+Math.sin(yaw)*1.5,p.pos[1]+.7,p.pos[2]+Math.cos(yaw)*1.5);drawMap();
 }
-function finish() {
-  playing = false; keys.clear();
-  const won = game.state === 'won';
-  $('overlay').hidden = false;
-  $('panel-eyebrow').textContent = won ? 'NĂM NGỌN ĐÈN. MỘT HÒN ĐẢO THỨC GIẤC.' : 'MỖI ĐÊM LÀ MỘT CƠ HỘI MỚI';
-  $('panel-title').innerHTML = won ? 'Đảo đã sáng.<br><em>Cảm ơn Mây.</em>' : 'Đêm khép lại.<br><em>Thử lại nhé.</em>';
-  $('panel-description').textContent = `${won ? 'Bạn đã mang ánh sáng về Đảo Bến.' : game.player.flames <= 0 ? 'Bóng Mực đã làm tắt những ngọn lửa của Mây.' : 'Bình minh đã đến trước khi các đèn được thắp.'} Điểm của bạn: ${game.score.toLocaleString('vi-VN')}.`;
-  $('intro-rules').hidden = true; $('play').textContent = 'Chơi lại Đêm 1';
+function frame(now){const elapsed=Math.min((now-previousTime)/1000,.25);previousTime=now;const running=['playing','pause'].includes(campaign.screen)||(campaign.screen==='settings'&&settingsFrom==='pause');if(running){accumulator+=elapsed;while(accumulator>=DT&&['playing','paused'].includes(game.state)){const x=Number(keys.has('KeyA')||keys.has('ArrowLeft'))-Number(keys.has('KeyD')||keys.has('ArrowRight')),z=Number(keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));const pauseInput=queuedPause&&!game.input.pause;if(pauseInput)queuedPause=false;const jump=keys.has('Space');if(game.state==='playing'&&jump&&!game.input.jump&&game.player.grounded)audio.effect('jump');handleEvents(game.step({move:[x,z],cam_yaw_deg:yaw*180/Math.PI,jump,interact:keys.has('KeyE'),pulse:keys.has('KeyQ'),dash:keys.has('ShiftLeft')||keys.has('ShiftRight'),pause:pauseInput}));accumulator-=DT;if(['won','lost'].includes(game.state))break;}}else accumulator=0;syncView(now);updateHud();if(now>toastUntil)$('toast').classList.remove('visible');renderer.render(scene,camera);frameTimes.push(now);if(frameTimes.length>600)frameTimes.shift();requestAnimationFrame(frame);}
+$('play').addEventListener('click',primary);$('pause').addEventListener('click',pause);$('retry').addEventListener('click',retry);$('menu').addEventListener('click',menu);$('settings').addEventListener('click',openSettings);$('panel-settings').addEventListener('click',openSettings);for(const id of['volume','sensitivity'])$(id).addEventListener('input',updateSettings);$('settings-back').addEventListener('click',()=>{campaign.screen=settingsFrom;showOverlay();if(campaign.screen==='playing')$('world').focus();});
+const gameKeys=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyE','KeyQ','ShiftLeft','ShiftRight'];
+addEventListener('keydown',event=>{if(['Escape','KeyP'].includes(event.code)&&!event.repeat){event.preventDefault();pause();}if(gameKeys.includes(event.code)&&campaign.screen==='playing'&&event.target.tagName!=='INPUT'&&event.target.tagName!=='BUTTON'){event.preventDefault();keys.add(event.code);}});addEventListener('keyup',event=>keys.delete(event.code));addEventListener('blur',()=>{keys.clear();if(campaign.screen==='playing')queuedPause=true;});document.addEventListener('visibilitychange',()=>{if(document.hidden&&campaign.screen==='playing')queuedPause=true;});
+let dragging=false;$('world').addEventListener('pointerdown',e=>{dragging=true;$('world').setPointerCapture(e.pointerId);$('world').focus();});$('world').addEventListener('pointermove',e=>{if(dragging)yaw-=e.movementX*.005*settings.sensitivity;});for(const name of['pointerup','pointercancel'])$('world').addEventListener(name,()=>{dragging=false;});$('world').addEventListener('wheel',e=>{e.preventDefault();cameraDistance=THREE.MathUtils.clamp(cameraDistance+e.deltaY*.01,7,20);},{passive:false});for(const b of document.querySelectorAll('[data-key]')){b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);if(campaign.screen==='playing')keys.add(b.dataset.key);});for(const n of['pointerup','pointercancel','lostpointercapture'])b.addEventListener(n,()=>keys.delete(b.dataset.key));}
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+bindGame(new Game(t,202603630));showOverlay();$('play').disabled=false;$('play').textContent='Bắt đầu hành trình';
+window.__dao={snapshot:()=>game.snapshot(),status:()=>({playing:campaign.screen==='playing',paused:game.state==='paused',screen:campaign.screen,night:campaign.night,total:campaign.total}),settings:()=>({...settings}),audio:()=>audio.status(),screenPosition:pos=>new THREE.Vector3(...pos).project(camera).toArray(),rendererInfo:()=>({calls:renderer.info.render.calls,triangles:renderer.info.render.triangles,gpu:gpuName}),palette:()=>({...palette}),performanceStats:()=>({frames:frameTimes.length,fps:frameTimes.length>1?(frameTimes.length-1)*1000/(frameTimes.at(-1)-frameTimes[0]):0,width:innerWidth,height:innerHeight,pixelRatio:renderer.getPixelRatio()}),resetPerformance:()=>{frameTimes.length=0;}};
+if(new URLSearchParams(location.search).get('qa')==='1'){
+  window.__dao.loadScenario=(scenario,night=1)=>{campaign.night=night;campaign.game=new Game(t,202603630,scenario,night);campaign.screen='playing';bindGame(campaign.game);showOverlay();$('world').focus();};
+  window.__dao.advance=(ticks,input={})=>{for(let i=0;i<ticks&&!['won','lost'].includes(game.state);i++)handleEvents(game.step(input));return game.snapshot();};
 }
-function handleEvents(events) {
-  for (const event of events) {
-    if (event.name === 'mote_picked') tone(620 + event.data.carried * 22, .08);
-    if (event.name === 'deposit') notify(`Đã nạp ${event.data.amount} đom đóm vào ${event.data.lantern_id}`);
-    if (event.name === 'lantern_lit') { notify('Một ngọn đèn đã sáng. Ở gần đèn để được an toàn!'); tone(880, .5); }
-    if (event.name === 'pulse') { pulseTime = performance.now() / 1000; tone(180, .4); }
-    if (event.name === 'player_hit') { notify('Bóng Mực chạm vào Mây! Hãy chạy về đèn hoặc nhấn Q.'); tone(110, .25); }
-    if (event.name === 'game_over') finish();
-  }
-}
-function updateHud() {
-  $('health').textContent = Array.from({ length: t.flames }, (_, i) => i < game.player.flames ? '♦' : '♢').join(' ');
-  $('health').setAttribute('aria-label', `${game.player.flames} máu`);
-  $('carried').textContent = game.player.carried;
-  $('carry-meter').style.width = `${game.player.carried / t.carry_capacity * 100}%`;
-  const seconds = Math.ceil(game.timeLeft);
-  $('timer').textContent = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
-  $('score').textContent = game.score.toLocaleString('vi-VN');
-  const lit = game.lanterns.filter(l => l.lit).length;
-  $('lantern-dots').textContent = game.lanterns.map(l => l.lit ? '●' : '○').join(' ');
-  $('lantern-count').textContent = `${lit} / 5 đèn đã sáng`;
-  $('objective').textContent = lit > 0 ? `Ánh sáng đã trở về ${lit} góc đảo. Còn ${5 - lit} đèn chờ Mây.` : 'Gom đom đóm. Thắp đèn. Tìm đường về.';
-  const cooldown = Math.max(0, (game.pulseUntil - game.tick) / 60);
-  $('pulse-status').textContent = cooldown > 0 ? `Tỏa sáng hồi sau ${cooldown.toFixed(1)}s` : `Tỏa sáng · Q · ${t.pulse_cost} đom đóm`;
-  const nearest = game.lanterns.filter(l => !l.lit).sort((a, b) => Math.hypot(a.pos[0] - game.player.pos[0], a.pos[2] - game.player.pos[2]) - Math.hypot(b.pos[0] - game.player.pos[0], b.pos[2] - game.player.pos[2]))[0];
-  const canInteract = nearest && Math.hypot(nearest.pos[0] - game.player.pos[0], nearest.pos[2] - game.player.pos[2]) <= t.interact_radius;
-  $('interaction').hidden = !playing || paused || !canInteract;
-  if (canInteract) $('interaction').lastElementChild.textContent = game.player.carried > 0 ? `Nạp ánh sáng · ${nearest.deposited}/${t.lantern_cost}` : `Cần đom đóm · ${nearest.deposited}/${t.lantern_cost}`;
-}
-const mapContext = $('map').getContext('2d');
-function drawMap() {
-  const ctx = mapContext, c = 110, scale = 3.05;
-  ctx.clearRect(0, 0, 220, 220);
-  ctx.fillStyle = '#152f37cc'; ctx.strokeStyle = '#7f9f9166'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.arc(c, c, 96, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-  const dot = (pos, radius, color) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(c - pos[0] * scale, c - pos[2] * scale, radius, 0, Math.PI * 2); ctx.fill(); };
-  for (const m of game.motes) dot(m.pos, 1.2, '#b5b66b');
-  for (const l of game.lanterns) {
-    if (l.lit) dot(l.pos, t.safe_radius * scale, '#e4bb6c1f');
-    dot(l.pos, l.lit ? 5 : 4, l.lit ? '#ffdc92' : '#8f8e74');
-  }
-  for (const s of game.shades) dot(s.pos, 3, s.state === 'stunned' ? '#b3e8e0' : '#b187d5');
-  dot(game.player.pos, 4, '#fff4d4');
-}
-function syncView(time) {
-  may.position.fromArray(game.player.pos);
-  const moving = Math.hypot(...game.input.move) > 0;
-  if (moving) lastMoveAngle = Math.atan2(game.input.move[0], game.input.move[1]) + yaw;
-  may.rotation.y = lastMoveAngle;
-  limbs.forEach((leg, i) => { leg.rotation.x = moving ? Math.sin(time * 12 + i * Math.PI) * .55 : 0; });
-  may.visible = !(game.tick < game.hitUntil && Math.floor(time * 12) % 2 === 0);
-  smallLantern.rotation.z = Math.sin(time * 3) * .12;
-  warm.position.set(game.player.pos[0], game.player.pos[1] + 2, game.player.pos[2]);
-  let litCount = 0;
-  for (const lantern of game.lanterns) {
-    const view = lanternViews.get(lantern.id);
-    view.cageMaterial.emissiveIntensity = lantern.lit ? 2 : .05;
-    view.cageMaterial.color.set(lantern.lit ? '#ffdb91' : '#897358');
-    view.halo.visible = lantern.lit; view.pool.visible = lantern.lit; view.light.intensity = lantern.lit ? 7 : 0;
-    if (lantern.lit) litCount++;
-    view.halo.scale.setScalar(1 + Math.sin(time * 1.6) * .035);
-  }
-  ambient.intensity = 1.9 + litCount * .19;
-  grass.material.color.set(litCount > 2 ? '#587c60' : '#496d59');
-  const liveMotes = new Set(game.motes.map(m => m.id));
-  for (const [id, view] of moteViews) if (!liveMotes.has(id)) { actors.remove(view); moteViews.delete(id); }
-  for (const [i, mote] of game.motes.entries()) {
-    let view = moteViews.get(mote.id);
-    if (!view) { view = mesh(moteGeometry, moteMat, actors); view.castShadow = false; moteViews.set(mote.id, view); }
-    view.position.set(mote.pos[0], .55 + Math.sin(time * 2 + i * 1.7) * .2, mote.pos[2]);
-    view.scale.setScalar(1 + Math.sin(time * 3 + i) * .25);
-  }
-  for (const shade of game.shades) {
-    let view = shadeViews.get(shade.id);
-    if (!view) { view = createShade(); shadeViews.set(shade.id, view); }
-    view.group.position.set(shade.pos[0], shade.pos[1] + Math.sin(time * 3 + shade.pos[0]) * .12, shade.pos[2]);
-    view.group.rotation.y = Math.atan2(game.player.pos[0] - shade.pos[0], game.player.pos[2] - shade.pos[2]);
-    view.material.color.set(shade.state === 'stunned' ? '#739d99' : '#342540');
-    view.material.emissiveIntensity = shade.state === 'stunned' ? .1 : .4;
-  }
-  const age = time - pulseTime;
-  pulseRing.material.opacity = age >= 0 && age < .65 ? (1 - age / .65) * .7 : 0;
-  pulseRing.scale.setScalar(Math.max(.01, Math.min(t.pulse_radius, age / .65 * t.pulse_radius)));
-  pulseRing.position.set(game.player.pos[0], .12, game.player.pos[2]);
-  const target = new THREE.Vector3(game.player.pos[0] - Math.sin(yaw) * cameraDistance, game.player.pos[1] + cameraDistance * .68, game.player.pos[2] - Math.cos(yaw) * cameraDistance);
-  camera.position.lerp(target, .13);
-  camera.lookAt(game.player.pos[0] + Math.sin(yaw) * 1.5, game.player.pos[1] + .7, game.player.pos[2] + Math.cos(yaw) * 1.5);
-  drawMap();
-}
-function frame(now) {
-  const elapsed = Math.min((now - previousTime) / 1000, .25); previousTime = now;
-  if (playing && !paused) {
-    accumulator += elapsed;
-    while (accumulator >= DT && game.state === 'playing') {
-      // Looking toward +Z makes camera-right point toward -X in Three.js.
-      const x = Number(keys.has('KeyA') || keys.has('ArrowLeft')) - Number(keys.has('KeyD') || keys.has('ArrowRight'));
-      const z = Number(keys.has('KeyW') || keys.has('ArrowUp')) - Number(keys.has('KeyS') || keys.has('ArrowDown'));
-      handleEvents(game.step({ move: [x, z], cam_yaw_deg: yaw * 180 / Math.PI, jump: keys.has('Space'), interact: keys.has('KeyE'), pulse: keys.has('KeyQ') }));
-      accumulator -= DT;
-    }
-  }
-  updateHud(); syncView(now / 1000);
-  if (now > toastUntil) $('toast').classList.remove('visible');
-  renderer.render(scene, camera); requestAnimationFrame(frame);
-}
-$('play').addEventListener('click', start);
-$('pause').addEventListener('click', () => togglePause());
-$('sound').addEventListener('click', async () => {
-  audio ??= new AudioContext(); await audio.resume(); soundOn = !soundOn;
-  $('sound').textContent = `Âm thanh: ${soundOn ? 'bật' : 'tắt'}`; $('sound').setAttribute('aria-pressed', String(soundOn)); tone(660);
-  if (playing && !paused) $('world').focus();
-});
-const gameKeys = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyE', 'KeyQ'];
-addEventListener('keydown', event => {
-  if (event.code === 'Escape' && !event.repeat) togglePause();
-  if (gameKeys.includes(event.code) && playing && !paused && event.target.tagName !== 'BUTTON') { event.preventDefault(); keys.add(event.code); }
-});
-addEventListener('keyup', event => keys.delete(event.code));
-addEventListener('blur', () => { keys.clear(); if (playing && !paused) togglePause(true); });
-document.addEventListener('visibilitychange', () => { if (document.hidden && playing && !paused) togglePause(true); });
-let dragging = false;
-$('world').addEventListener('pointerdown', event => { dragging = true; $('world').setPointerCapture(event.pointerId); });
-$('world').addEventListener('pointermove', event => { if (dragging) yaw -= event.movementX * .005; });
-$('world').addEventListener('pointerup', () => { dragging = false; });
-$('world').addEventListener('pointercancel', () => { dragging = false; });
-$('world').addEventListener('wheel', event => { event.preventDefault(); cameraDistance = THREE.MathUtils.clamp(cameraDistance + event.deltaY * .01, 7, 19); }, { passive: false });
-for (const button of document.querySelectorAll('[data-key]')) {
-  button.addEventListener('pointerdown', event => { event.preventDefault(); button.setPointerCapture(event.pointerId); if (playing && !paused) keys.add(button.dataset.key); });
-  for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) button.addEventListener(name, () => keys.delete(button.dataset.key));
-}
-addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
-reset(); camera.position.set(0, 10, -14); previousTime = performance.now();
-$('play').disabled = false; $('play').textContent = 'Mang ánh sáng về đảo';
-// Read-only inspection hook for reproducible browser QA; gameplay still goes through normal inputs.
-window.__dao = { snapshot: () => game.snapshot(), status: () => ({ playing, paused }), screenPosition: pos => new THREE.Vector3(...pos).project(camera).toArray(), rendererInfo: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }) };
 requestAnimationFrame(frame);

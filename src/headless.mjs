@@ -19,26 +19,27 @@ function main() {
     return value;
   };
   const seed = integer('--seed', undefined, -Number.MAX_SAFE_INTEGER);
-  if (integer('--night') !== 1) throw new Error('Only --night 1 is available');
+  const night=integer('--night');
+  if (![1,2,3].includes(night)) throw new Error('--night must be 1, 2 or 3');
   const ticks = integer('--ticks');
   const interval = integer('--snapshot-every', 10, 1);
   if (!options['--out']) throw new Error('--out is required');
   let scenario = {}, inputs = { frames: [] };
   try {
-    if (options['--scenario']) scenario = validateScenario(JSON.parse(readFileSync(options['--scenario'], 'utf8').replace(/^\uFEFF/, '')), contract.tuning);
+    if (options['--scenario']) scenario = validateScenario(JSON.parse(readFileSync(options['--scenario'], 'utf8').replace(/^\uFEFF/, '')), contract.tuning, night);
     if (options['--inputs']) inputs = validateInputs(JSON.parse(readFileSync(options['--inputs'], 'utf8').replace(/^\uFEFF/, '')));
   } catch (error) {
     console.error(`Invalid inputs/scenario: ${error.message}`);
     process.exitCode = 2;
     return;
   }
-  const game = new Game(contract.tuning, seed, scenario);
+  const game = new Game(contract.tuning, seed, scenario, night);
   const fd = openSync(options['--out'], 'w');
   try {
     const write = value => writeSync(fd, JSON.stringify(value) + '\n');
     write(game.snapshot());
     let index = 0;
-    for (let k = 0; k < ticks && game.state === 'playing'; k++) {
+    for (let k = 0; k < ticks && ['playing','paused'].includes(game.state); k++) {
       let input;
       if (inputs.frames[index]?.tick === k) input = inputs.frames[index++];
       for (const event of game.step(input)) write(event);

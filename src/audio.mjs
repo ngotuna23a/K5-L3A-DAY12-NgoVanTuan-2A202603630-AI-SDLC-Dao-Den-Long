@@ -1,0 +1,9 @@
+export class GameAudio {
+  constructor(volume=.35){this.volume=volume;this.context=null;this.master=null;this.musicTimer=null;this.step=0;this.effects={};}
+  async unlock(){if(!this.context){this.context=new AudioContext();this.master=this.context.createGain();this.master.connect(this.context.destination);}await this.context.resume();this.setVolume(this.volume);}
+  setVolume(value){this.volume=Number(value);if(this.master)this.master.gain.setValueAtTime(this.volume,this.context.currentTime);}
+  tone(frequency,duration=.15,type='sine',strength=.12,delay=0){if(!this.context||this.volume===0)return;const c=this.context,o=c.createOscillator(),g=c.createGain(),now=c.currentTime+delay;o.type=type;o.frequency.setValueAtTime(frequency,now);g.gain.setValueAtTime(strength,now);g.gain.exponentialRampToValueAtTime(.0001,now+duration);o.connect(g);g.connect(this.master);o.start(now);o.stop(now+duration);}
+  effect(name){const sounds={mote_picked:[880,.09],lantern_lit:[660,.6],pulse:[140,.35],player_hit:[85,.3],jump:[360,.12],dash:[230,.16],won:[784,.8],lost:[130,.7],shade_spawned:[100,.4],countdown:[520,.08],charm_picked:[1100,.4],drifter_steal:[180,.2],wind:[90,.7]};const s=sounds[name];if(!s)return;this.effects[name]=(this.effects[name]??0)+1;this.tone(s[0],s[1],['pulse','dash','wind'].includes(name)?'triangle':'sine');if(['won','lantern_lit'].includes(name)){this.tone(s[0]*1.25,.35,'sine',.08,.13);this.tone(s[0]*1.5,.5,'sine',.08,.26);}}
+  music(on){if(this.musicTimer){clearInterval(this.musicTimer);this.musicTimer=null;}if(!on||!this.context)return;const notes=[196,246.94,293.66,392,329.63,293.66,246.94,220];this.musicTimer=setInterval(()=>{const f=notes[this.step++%notes.length];this.tone(f,1.7,'sine',.035);this.tone(f/2,1.7,'triangle',.018);},850);}
+  status(){return{unlocked:Boolean(this.context),volume:this.volume,music:Boolean(this.musicTimer),state:this.context?.state??'locked',effects:{...this.effects}};}
+}

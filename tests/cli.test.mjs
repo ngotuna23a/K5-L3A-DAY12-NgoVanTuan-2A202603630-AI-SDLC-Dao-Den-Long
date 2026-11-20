@@ -19,7 +19,7 @@ test('CLI JSONL tick model, inputs persistence, end last, exact determinism', ()
   assert.deepEqual(lines.filter(l => l.type === 'snapshot').map(l => l.tick), [0, 10, 20]);
   assert.equal(lines.find(l => l.type === 'event').tick, 1);
   assert.deepEqual(lines.at(-2).player.pos, [0, 0, 1]);
-  assert.deepEqual(lines.at(-1), { type: 'end', ticks: 20, state: 'playing', score: 10 });
+  assert.deepEqual(lines.at(-1), { type: 'end', ticks: 20, state: 'playing', score: 0 });
   assert.equal(a.stdout, '');
 });
 test('invalid JSON or schema returns code 2 and stderr', () => {
@@ -43,4 +43,22 @@ test('zero steps emits only snapshot zero and end; terminal exits early', () => 
   const lines = readFileSync(result.out, 'utf8').trim().split('\n').map(JSON.parse);
   assert.equal(result.status, 0);
   assert.equal(lines.at(-1).ticks, 1); assert.equal(lines.at(-1).state, 'lost');
+});
+test('v1.1 accepts all nights and emits the required snapshot fields',()=>{
+  for(const night of[1,2,3]){
+    const out=join(directory,'night-'+night+'.jsonl');
+    const r=spawnSync(process.execPath,[cli,'--seed','42','--night',String(night),'--ticks','0','--out',out],{encoding:'utf8'});
+    assert.equal(r.status,0,r.stderr);const s=JSON.parse(readFileSync(out,'utf8').split('\n')[0]);
+    assert.equal(s.night,night);assert.equal(s.lanterns.length,night+4);assert.equal(s.motes.length,20);
+    for(const key of['vel','grounded','invuln','dash_cd_s','pulse_cd_s','charm_s'])assert.ok(key in s.player);
+    for(const key of['motes','drifters','charms'])assert.ok(Array.isArray(s[key]));assert.equal(s.wind.active,false);
+  }
+});
+test('CLI pause keeps tick running and uses real ticks for pause events',()=>{
+  const inputs=write('pause-frames.json',{frames:[{tick:0,pause:true},{tick:1,pause:false},{tick:15,pause:true},{tick:16,pause:false}]});
+  const r=run(['--inputs',inputs]);assert.equal(r.status,0,r.stderr);
+  const lines=readFileSync(r.out,'utf8').trim().split('\n').map(JSON.parse);
+  const mid=lines.find(l=>l.type==='snapshot'&&l.tick===10);assert.equal(mid.state,'paused');assert.equal(mid.sim_tick,0);assert.equal(mid.time_left_s,300);
+  const end=lines.find(l=>l.type==='snapshot'&&l.tick===20);assert.equal(end.sim_tick,5);assert.equal(end.state,'playing');
+  assert.equal(lines.find(l=>l.name==='paused').tick,1);assert.equal(lines.find(l=>l.name==='resumed').tick,16);
 });

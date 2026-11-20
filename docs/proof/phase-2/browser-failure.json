@@ -1,0 +1,10 @@
+{
+  "message": "{\"exceptionId\":1,\"text\":\"Uncaught\",\"lineNumber\":0,\"columnNumber\":48,\"scriptId\":\"24\",\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"SyntaxError\",\"description\":\"SyntaxError: missing ) after argument list\",\"objectId\":\"-8315269528594710985.2.2\"}}",
+  "checks": [
+    "WebGL renders main menu and default Night 1",
+    "Menu to ?ng ??ng introduction to gameplay; audio unlocked",
+    "W moves forward"
+  ],
+  "errors": [],
+  "details": {}
+}

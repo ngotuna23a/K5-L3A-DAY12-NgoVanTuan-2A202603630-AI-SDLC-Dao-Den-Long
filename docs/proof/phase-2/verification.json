@@ -1,0 +1,232 @@
+{
+  "contract_version": "1.1",
+  "node": "v22.23.5",
+  "machine": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz"
+  },
+  "cases": [
+    {
+      "name": "dash",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 12,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "pause",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 120,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "fall",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 61,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "pad",
+      "night": 2,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 90,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "upper-pad",
+      "night": 3,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 60,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "charm",
+      "night": 2,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 30,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "drifter",
+      "night": 2,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "drifter-drop",
+      "night": 2,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "wind",
+      "night": 3,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 2100,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "safe-zone",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 30,
+        "state": "playing",
+        "score": 0
+      }
+    },
+    {
+      "name": "pulse",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 15,
+        "state": "playing",
+        "score": 5
+      }
+    },
+    {
+      "name": "dawn",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 3,
+        "state": "lost",
+        "score": 0
+      }
+    },
+    {
+      "name": "no-flames",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "lost",
+        "score": 0
+      }
+    },
+    {
+      "name": "win",
+      "night": 1,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "won",
+        "score": 948
+      }
+    },
+    {
+      "name": "default-play",
+      "night": 1,
+      "seed": 202603630,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 8344,
+        "state": "won",
+        "score": 1470
+      },
+      "scenario_override": false
+    }
+  ],
+  "benchmarks": [
+    {
+      "night": 1,
+      "ticks": 18000,
+      "seconds": 1.0921108000000004,
+      "threshold_s": 30,
+      "passed": true,
+      "command": "C:\\Users\\ngova\\AppData\\Local\\Programs\\SC17-Node\\node-v22.23.5-win-x64\\node.exe src/headless.mjs --seed 42 --night 1 --scenario D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\tmp\\phase-2-publish-7d32045b\\docs\\proof\\phase-2\\benchmark-scenario.json --ticks 18000 --snapshot-every 600 --out D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\tmp\\phase-2-publish-7d32045b\\docs\\proof\\phase-2\\benchmark-night-1.jsonl",
+      "note": "Only health overridden to prevent early death; normal world and scheduled spawns run"
+    },
+    {
+      "night": 2,
+      "ticks": 19800,
+      "seconds": 1.8277451999999994,
+      "threshold_s": 30,
+      "passed": true,
+      "command": "C:\\Users\\ngova\\AppData\\Local\\Programs\\SC17-Node\\node-v22.23.5-win-x64\\node.exe src/headless.mjs --seed 42 --night 2 --scenario D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\tmp\\phase-2-publish-7d32045b\\docs\\proof\\phase-2\\benchmark-scenario.json --ticks 19800 --snapshot-every 600 --out D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\tmp\\phase-2-publish-7d32045b\\docs\\proof\\phase-2\\benchmark-night-2.jsonl",
+      "note": "Only health overridden to prevent early death; normal world and scheduled spawns run"
+    },
+    {
+      "night": 3,
+      "ticks": 21600,
+      "seconds": 2.463824199999999,
+      "threshold_s": 30,
+      "passed": true,
+      "command": "C:\\Users\\ngova\\AppData\\Local\\Programs\\SC17-Node\\node-v22.23.5-win-x64\\node.exe src/headless.mjs --seed 42 --night 3 --scenario D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\tmp\\phase-2-publish-7d32045b\\docs\\proof\\phase-2\\benchmark-scenario.json --ticks 21600 --snapshot-every 600 --out D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\tmp\\phase-2-publish-7d32045b\\docs\\proof\\phase-2\\benchmark-night-3.jsonl",
+      "note": "Only health overridden to prevent early death; normal world and scheduled spawns run"
+    }
+  ],
+  "http": "13 checks passed",
+  "source_sha256": {
+    "game.contract.json": "b4eb1f3218a08871b261e90e3f6d0eb616b0f4ae5b6a718cfac8e74de6154c4f",
+    "src/game.mjs": "841bf3e98efc4d5c2e965d9236a79ddc92b43030fdb2a192b2c6bb40f562e831",
+    "src/world.mjs": "e9945c2fb6c7fe7b40bf4be781c3de5f9e175e9c547e476b07417781114a1324",
+    "src/campaign.mjs": "be20cf82fd80a1176e65a69115e3ed031d3e68eeb326fe9da5066800d2effd3e",
+    "src/audio.mjs": "2dc15e1407d87233daf0b6d97f2f67a88d5a65edd768de9b9a115069f87a55e0",
+    "src/validation.mjs": "8184bb3335a25226ad6f48665d6fdb6d4a3064e0359f522f5c899474a437e9c7",
+    "src/headless.mjs": "2b3acb3938cee94b5010cdf8e7455075e9c3fec7a3246be8a1bdeef7cac89728",
+    "src/browser.mjs": "f3e7b0624cd8389344aaf35cc752ceff750c14450836c5b00aa33e7c5194a026",
+    "tests/game.test.mjs": "a1a7c77a42a9a40bef3187b9ea8f117e695f395f92ae4f3ecb51f7602bde4f38",
+    "tests/cli.test.mjs": "2d3d392a4bbdf6bd71cf4370456516399588056b27a563571956d3f5da0de390",
+    "scripts/autoplay.mjs": "811545c2168d34c16c7907665e6a4f56ef13c058e3bea062dca2ab7a0718aa57",
+    "scripts/verify.mjs": "78146bf421f51d22328899af8d6affa00815f98138573e5229f59446f42e70f5",
+    "scripts/build.mjs": "f84f69db5bed9851b00e4c4561f63384c038e88a080f37d9ffa0114391f930e4",
+    "scripts/browser-qa.mjs": "e905d625da528d53fd41758e36a02a39bff6a71e687d1ba60898400eadb8acd7",
+    "index.html": "ec7cbd1c0eea93c8c4ac08d85299d074c190f8c8395b4c12c85fb171851fc26a",
+    "style.css": "4ef7720b3db4cec4319decbe5d2d39e36c899f91a150cf05627b5d97063d760e",
+    "package-lock.json": "789d3f6e2e1e7a5371c3d5f601e02600bcc34cc5500cc3476f0dd8462abe36d1"
+  },
+  "limits": [
+    "Browser QA and FPS recorded separately",
+    "Windows local run; CI records its own environment",
+    "GUI campaign wins use scenarios; default Night 1 win above is input-only with no scenario override"
+  ]
+}

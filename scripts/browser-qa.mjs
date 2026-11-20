@@ -28,7 +28,7 @@ function cdp(method, params = {}) {
   });
 }
 async function evaluate(expression) {
-  const result = await cdp('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
+  const result = await cdp('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true, userGesture: true });
   if (result.exceptionDetails) throw new Error(JSON.stringify(result.exceptionDetails));
   return result.result.value;
 }
@@ -40,114 +40,51 @@ async function until(expression, timeout = 15000) {
   }
   throw new Error(`Timed out waiting: ${expression}`);
 }
-async function key(code, key, type) { await cdp('Input.dispatchKeyEvent', { type, code, key, windowsVirtualKeyCode: key.length === 1 ? key.toUpperCase().charCodeAt(0) : code === 'Space' ? 32 : 27 }); }
-const proof = resolve('docs/proof/phase-1'); await mkdir(proof, { recursive: true });
-try {
-  await cdp('Runtime.enable'); await cdp('Log.clear'); await cdp('Log.enable'); await cdp('Page.enable');
-  errors.length = 0;
-  await cdp('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
-  await cdp('Page.navigate', { url: 'http://127.0.0.1:4173' });
-  await until('Boolean(window.__dao) && !document.getElementById("play").disabled');
-  assert.ok(await evaluate('window.__dao.rendererInfo().triangles > 0'));
-  await writeFile(resolve(proof, 'intro.png'), Buffer.from((await cdp('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
-  await evaluate('document.getElementById("play").click()');
-  assert.equal(await evaluate('document.activeElement.id'), 'world');
-  const before = await evaluate('window.__dao.snapshot()');
-  await key('KeyW', 'w', 'keyDown');
-  await until(`window.__dao.snapshot().player.pos[2] >= ${before.player.pos[2] + .8}`);
-  await key('KeyW', 'w', 'keyUp');
-  const moved = await evaluate('window.__dao.snapshot()');
-  assert.ok(moved.player.pos[2] > before.player.pos[2] + .5);
-  const horizontalChecks = [];
-  async function checkHorizontal(code, label, direction) {
-    const origin = await evaluate('window.__dao.snapshot().player.pos');
-    await key(code, label, 'keyDown');
-    try {
-      await until(`Math.hypot(window.__dao.snapshot().player.pos[0] - ${origin[0]}, window.__dao.snapshot().player.pos[2] - ${origin[2]}) >= .6`);
-    } finally { await key(code, label, 'keyUp'); }
-    // Project both world positions through the same camera so follow motion cannot hide an inverted input.
-    const screenDelta = await evaluate(`(() => { const a = window.__dao.screenPosition(${JSON.stringify(origin)}); const b = window.__dao.screenPosition(window.__dao.snapshot().player.pos); return b[0] - a[0]; })()`);
-    assert.ok(screenDelta * direction > .01, `${code}: wrong on-screen direction (${screenDelta})`);
-    horizontalChecks.push({ code, direction: direction > 0 ? 'right' : 'left', screenDelta });
+async function key(code, key, type) { const special={Space:32,ShiftLeft:16,ShiftRight:16,ArrowLeft:37,ArrowUp:38,ArrowRight:39,ArrowDown:40,Escape:27};await cdp('Input.dispatchKeyEvent', { type, code, key, windowsVirtualKeyCode: special[code]??(key.length===1?key.toUpperCase().charCodeAt(0):0) }); }
+const proof=resolve('docs/proof/phase-2');await mkdir(proof,{recursive:true});
+const checks=[],details={};
+const record=name=>{checks.push(name);console.log('OK: '+name);};
+const quiet={random_motes:false,random_shades:false,random_drifters:false,wind_enabled:false,motes:[],shades:[],drifters:[],charms:[]};
+const click=async id=>{await evaluate("document.getElementById("+JSON.stringify(id)+").click()");};
+const load=async(scenario={},night=1)=>{await evaluate('window.__dao.loadScenario('+JSON.stringify({...quiet,...scenario})+','+night+')');await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');};
+const snapshot=()=>evaluate('window.__dao.snapshot()');
+const shot=async name=>writeFile(resolve(proof,name+'.png'),Buffer.from((await cdp('Page.captureScreenshot',{format:'png'})).data,'base64'));
+try{
+  await cdp('Runtime.enable');await cdp('Log.clear');await cdp('Log.enable');await cdp('Page.enable');errors.length=0;
+  await cdp('Emulation.setTouchEmulationEnabled',{enabled:false});await cdp('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
+  await cdp('Page.navigate',{url:'http://127.0.0.1:4173/?qa=1'});await until('Boolean(window.__dao)&&!document.getElementById("play").disabled',30000);
+  assert.ok(await evaluate('window.__dao.rendererInfo().triangles>0'));assert.equal((await snapshot()).night,1);await shot('menu');record('WebGL renders main menu and default Night 1');
+  await click('play');assert.equal(await evaluate('window.__dao.status().screen'),'intro');assert.ok(await evaluate('document.getElementById("panel-description").textContent.includes("Ông Đăng")'));await click('play');await until('window.__dao.status().screen==="playing"');assert.equal(await evaluate('document.activeElement.id'),'world');assert.equal(await evaluate('window.__dao.audio().state'),'running');record('Menu to Ông Đăng introduction to gameplay; audio unlocked');
+  const before=await snapshot();await key('KeyW','w','keyDown');await until('window.__dao.snapshot().player.pos[2]>.8');await key('KeyW','w','keyUp');record('W moves forward');
+  const horizontal=[];async function directionTest(code,label,sign){const p=(await snapshot()).player.pos;await key(code,label,'keyDown');try{await until('Math.hypot(window.__dao.snapshot().player.pos[0]-('+p[0]+'),window.__dao.snapshot().player.pos[2]-('+p[2]+'))>.6');}finally{await key(code,label,'keyUp');}const delta=await evaluate('window.__dao.screenPosition(window.__dao.snapshot().player.pos)[0]-window.__dao.screenPosition('+JSON.stringify(p)+')[0]');assert.ok(delta*sign>.01,code+' inverted');horizontal.push({code,sign,delta});}
+  for(const[code,label,sign]of[['KeyA','a',-1],['KeyD','d',1],['ArrowLeft','ArrowLeft',-1],['ArrowRight','ArrowRight',1]])await directionTest(code,label,sign);record('A/D and arrow keys agree with screen left/right');
+  await cdp('Input.dispatchMouseEvent',{type:'mousePressed',x:640,y:370,button:'left',clickCount:1});await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',x:954,y:370,button:'left',buttons:1});await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',x:954,y:370,button:'left',clickCount:1});await until('Math.abs(window.__dao.screenPosition([0,0,1])[0]-window.__dao.screenPosition([0,0,0])[0])>.02');await directionTest('KeyA','a',-1);await directionTest('KeyD','d',1);details.horizontal=horizontal;record('Screen left/right remain correct after camera rotation');
+  await load();await key('Space',' ','keyDown');await until('window.__dao.snapshot().player.pos[1]>.1');await key('Space',' ','keyUp');await until('window.__dao.snapshot().player.grounded');record('Jump lands on the shared terrain');
+  await key('ShiftLeft','Shift','keyDown');await until('window.__dao.snapshot().player.dash_cd_s>0');await key('ShiftLeft','Shift','keyUp');assert.ok(await evaluate('document.getElementById("dash-status").textContent.includes("s")'));record('Shift triggers dash and HUD cooldown');
+  await key('KeyP','p','keyDown');await key('KeyP','p','keyUp');await until('window.__dao.status().paused');const paused=await snapshot();await evaluate('new Promise(r=>setTimeout(r,300))');const frozen=await snapshot();assert.ok(frozen.tick>paused.tick);assert.equal(frozen.sim_tick,paused.sim_tick);assert.equal(frozen.time_left_s,paused.time_left_s);assert.equal(frozen.player.dash_cd_s,paused.player.dash_cd_s);for(const id of['play','retry','panel-settings','menu'])assert.equal(await evaluate('document.getElementById('+JSON.stringify(id)+').hidden'),false);record('P pauses simulation, advances only tick, exposes all pause actions');
+  await click('panel-settings');await evaluate("document.getElementById('volume').value='.55';document.getElementById('volume').dispatchEvent(new Event('input'));document.getElementById('sensitivity').value='1.4';document.getElementById('sensitivity').dispatchEvent(new Event('input'))");assert.deepEqual(await evaluate('window.__dao.settings()'),{volume:.55,sensitivity:1.4});assert.equal(await evaluate('window.__dao.audio().volume'),.55);await click('settings-back');await click('play');await until('window.__dao.status().screen==="playing"');record('Volume/sensitivity settings apply and resume works');
+  await cdp('Page.reload');await until('Boolean(window.__dao)&&!document.getElementById("play").disabled');assert.deepEqual(await evaluate('window.__dao.settings()'),{volume:.55,sensitivity:1.4});await click('play');await click('play');record('Settings persist across reload');
+  await load({charms:[{id:'C1',pos:[0,0,0],available:true}]},2);await until('window.__dao.snapshot().player.charm_s>0');assert.equal(await evaluate('document.getElementById("charm-status").hidden'),false);assert.equal(await evaluate('document.querySelectorAll("#carry-slots i").length'),10);await shot('night-2');record('Night 2 bridge/pads/charm and ten-slot HUD render');
+  await load({player:{pos:[20,0,18]}},2);await until('window.__dao.snapshot().player.pos[1]>1');await until('window.__dao.snapshot().player.grounded&&window.__dao.snapshot().player.pos[0]>42',20000);record('Night 2 jump pad launches and lands on the other island');
+  await load({player:{carried:8},drifters:[{id:'D1',pos:[0,.8,0],state:'chase'}]},2);await until('window.__dao.snapshot().player.carried===5');assert.equal((await snapshot()).drifters[0].stolen,3);record('Gió Lạc steals three and enters flee');
+  await load({player:{pos:[42,-10.1,0],carried:8}},1);await until('window.__dao.snapshot().player.flames===2');await until('window.__dao.snapshot().player.pos[1]===0&&window.__dao.snapshot().player.invuln',20000);assert.equal((await snapshot()).player.carried,0);record('Fall penalty and respawn render correctly');
+  await load({player:{carried:3},shades:[{pos:[3,.8,0]}]});await key('KeyQ','q','keyDown');await until('window.__dao.snapshot().shades[0].state==="stunned"');await key('KeyQ','q','keyUp');assert.equal((await snapshot()).player.carried,0);record('Q pulses, consumes three and stuns enemy');
+  await load({time_left_s:29});assert.equal(await evaluate('document.getElementById("timer").parentElement.classList.contains("danger")'),true);assert.equal(await evaluate('getComputedStyle(document.getElementById("timer").parentElement).animationName'),'warning');record('Last 30 seconds uses danger color and flashing');
+  // Full GUI campaign transitions use explicit scenario fixtures, not a claim of normal-world completion.
+  await click('pause');await until('window.__dao.status().paused');await click('menu');await click('play');await click('play');const wins=[];
+  for(const night of[1,2,3]){
+    const lanterns=Array.from({length:night+4},(_,i)=>({id:'L'+(i+1),...(i?{lit:true}:{pos:night===3?[0,6,6]:[0,0,0]})}));
+    if(night===3){await load({wind_enabled:true},3);await evaluate('window.__dao.advance(1800)');await until('!document.getElementById("wind-warning").hidden');assert.equal((await snapshot()).wind.active,true);await shot('night-3');record('Night 3 tiers, tower, ramps and strong wind render');}
+    await load({player:{pos:night===3?[0,6,6]:[0,0,0],carried:10},lanterns},night);await key('KeyE','e','keyDown');await until('window.__dao.snapshot().state==="won"');await key('KeyE','e','keyUp');wins.push((await snapshot()).score);assert.equal(await evaluate('window.__dao.status().screen'),night===3?'dawn':'result');await shot('won-night-'+night);if(night<3){await click('play');assert.equal(await evaluate('window.__dao.status().screen'),'intro');assert.equal(await evaluate('window.__dao.status().night'),night+1);await click('play');}
   }
-  await checkHorizontal('KeyA', 'a', -1);
-  await checkHorizontal('KeyD', 'd', 1);
-  await checkHorizontal('ArrowLeft', 'ArrowLeft', -1);
-  await checkHorizontal('ArrowRight', 'ArrowRight', 1);
-  // Rotate the actual camera through mouse input and repeat; screen-relative controls must still agree.
-  await cdp('Input.dispatchMouseEvent', { type: 'mousePressed', x: 720, y: 500, button: 'left', clickCount: 1 });
-  await cdp('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 1034, y: 500, button: 'left', buttons: 1 });
-  await cdp('Input.dispatchMouseEvent', { type: 'mouseReleased', x: 1034, y: 500, button: 'left', clickCount: 1 });
-  await until('Math.abs(window.__dao.screenPosition([0, 0, 1])[0] - window.__dao.screenPosition([0, 0, 0])[0]) > .02');
-  await evaluate('new Promise(resolve => setTimeout(resolve, 500))');
-  await checkHorizontal('KeyA', 'a', -1);
-  await checkHorizontal('KeyD', 'd', 1);
-  // Reload to restore the default camera and world for the remaining independent checks.
-  await cdp('Page.reload');
-  await until('Boolean(window.__dao) && !document.getElementById("play").disabled');
-  await evaluate('document.getElementById("play").click()');
-  await key('Space', ' ', 'keyDown');
-  await until('window.__dao.snapshot().player.pos[1] > .1');
-  await key('Space', ' ', 'keyUp');
-  await until('window.__dao.snapshot().player.pos[1] === 0');
-  await evaluate('document.getElementById("pause").click()');
-  const pausedTick = await evaluate('window.__dao.snapshot().tick');
-  await evaluate('new Promise(resolve => setTimeout(resolve, 350))');
-  assert.equal(await evaluate('window.__dao.snapshot().tick'), pausedTick);
-  await evaluate('document.getElementById("play").click()');
-  await until(`window.__dao.snapshot().tick > ${pausedTick}`);
-  await writeFile(resolve(proof, 'gameplay.png'), Buffer.from((await cdp('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
-  let fullPlay;
-  if (process.argv.includes('--full-play')) {
-    await evaluate(`(() => {
-      const pressed = new Set(); let pulse = false, interact = false;
-      window.__qaBotDone = false;
-      const bot = setInterval(() => {
-        const s = window.__dao.snapshot();
-        const desired = new Set();
-        if (s.state !== 'playing') {
-          for (const code of pressed) document.getElementById('world').dispatchEvent(new KeyboardEvent('keyup', { code, bubbles: true }));
-          clearInterval(bot); window.__qaBotDone = true; return;
-        }
-        const p = s.player;
-        const dist = o => Math.hypot(o.pos[0] - p.pos[0], o.pos[2] - p.pos[2]);
-        const lamps = s.lanterns.filter(l => !l.lit).sort((a,b) => dist(a)-dist(b));
-        const target = p.carried >= 8 ? lamps[0] : s.motes.slice().sort((a,b) => dist(a)-dist(b))[0] ?? lamps[0];
-        if (target) {
-          const dx = target.pos[0] - p.pos[0], dz = target.pos[2] - p.pos[2];
-          if (Math.abs(dx) > .3) desired.add(dx > 0 ? 'KeyA' : 'KeyD');
-          if (Math.abs(dz) > .3) desired.add(dz > 0 ? 'KeyW' : 'KeyS');
-        }
-        interact = !interact && lamps.some(l => dist(l) < 2.7) && p.carried > 0;
-        pulse = !pulse && p.carried >= 2 && s.shades.some(sh => sh.state !== 'stunned' && dist(sh) < 4.5);
-        if (interact) desired.add('KeyE'); if (pulse) desired.add('KeyQ');
-        for (const code of pressed) if (!desired.has(code)) document.getElementById('world').dispatchEvent(new KeyboardEvent('keyup', { code, bubbles: true }));
-        for (const code of desired) if (!pressed.has(code)) document.getElementById('world').dispatchEvent(new KeyboardEvent('keydown', { code, bubbles: true }));
-        pressed.clear(); for (const code of desired) pressed.add(code);
-      }, 40);
-    })()`);
-    await until('window.__qaBotDone', 150000);
-    fullPlay = await evaluate('window.__dao.snapshot()');
-    assert.equal(fullPlay.state, 'won', 'Browser input-only bot should win');
-    assert.equal(fullPlay.lanterns.filter(l => l.lit).length, 5);
-    assert.equal(await evaluate('document.getElementById("overlay").hidden'), false);
-    await writeFile(resolve(proof, 'won.png'), Buffer.from((await cdp('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
-    await evaluate('document.getElementById("play").click()');
-    const replay = await evaluate('window.__dao.snapshot()');
-    assert.equal(replay.state, 'playing'); assert.equal(replay.score, 0); assert.equal(replay.lanterns.filter(l => l.lit).length, 0);
-  }
-  await cdp('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
-  await cdp('Emulation.setTouchEmulationEnabled', { enabled: true });
-  await cdp('Page.reload');
-  await until('Boolean(window.__dao) && !document.getElementById("play").disabled && innerWidth === 390');
-  await evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
-  assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
-  await writeFile(resolve(proof, 'mobile.png'), Buffer.from((await cdp('Page.captureScreenshot', { format: 'png' })).data, 'base64'));
-  assert.deepEqual(errors, []);
-  const checks = ['WebGL draws triangles', 'start focuses game canvas', 'W moves player', 'Space jumps and lands', 'pause freezes gameplay tick', 'resume advances tick', 'mobile viewport has no horizontal overflow', 'no browser exception/error'];
-  checks.push('A moves left on screen', 'D moves right on screen', 'ArrowLeft moves left on screen', 'ArrowRight moves right on screen', 'A moves left after camera rotation', 'D moves right after camera rotation');
-  if (fullPlay) checks.push('input-only bot wins default night in browser', 'win overlay and replay reset state');
-  const report = { browser: await cdp('Browser.getVersion'), checks, errors, before, moved, horizontalChecks, ...(fullPlay ? { fullPlay } : {}), render: await evaluate('window.__dao.rendererInfo()') };
-  await writeFile(resolve(proof, 'browser-qa.json'), JSON.stringify(report, null, 2) + '\n');
-  console.log(`Browser QA passed: ${report.checks.length} checks. Screenshots: docs/proof/phase-1/`);
-} finally { await cdp('Page.navigate', { url: 'about:blank' }).catch(() => {}); socket.close(); }
+  assert.equal(await evaluate('window.__dao.status().total'),wins.reduce((a,b)=>a+b,0));details.campaign={scenarioBased:true,scores:wins,total:wins.reduce((a,b)=>a+b,0)};record('Three-night campaign, Ông Đăng intros, result screens and dawn total');
+  await click('play');await click('play');await load({player:{flames:1},shades:[{pos:[0,.8,0]}]});await until('window.__dao.snapshot().state==="lost"');await click('play');assert.equal(await evaluate('window.__dao.status().night'),1);assert.equal((await snapshot()).player.flames,3);record('Loss retries current night with full health');
+  await load({},3);const map=await evaluate('window.__dao.snapshot()');await load({lanterns:map.lanterns.map((l,i)=>({id:l.id,lit:i>0})),motes:Array.from({length:30},(_,i)=>[Math.cos(i)*30,0,Math.sin(i)*30]),shades:Array.from({length:10},(_,i)=>({id:'S'+i,pos:[Math.cos(i)*43,.8,Math.sin(i)*43]}))},3);
+  await evaluate('window.__dao.resetPerformance()');await evaluate('new Promise(r=>setTimeout(r,6000))');details.performance=await evaluate('window.__dao.performanceStats()');details.renderer=await evaluate('window.__dao.rendererInfo()');details.performance.threshold_fps=30;details.performance.measurement_s=6;details.performance.passed=details.performance.fps>=30;assert.ok(details.performance.passed,'Average FPS below 30');record('Measured actual FPS at 1280x720 in Night 3 stress scene');await shot('performance');
+  const palette=await evaluate('window.__dao.palette()');assert.equal(palette.sky,'#0E1430');assert.equal(palette.tunic,'#E8E2D0');assert.equal(palette.shade,'#120A1A');details.palette=palette;record('Palette matches Ticket-02 hex values');
+  await cdp('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await cdp('Emulation.setTouchEmulationEnabled',{enabled:true});await cdp('Page.reload');await until('Boolean(window.__dao)&&innerWidth===390',30000);await shot('mobile');assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);record('Mobile viewport has no horizontal overflow');
+  assert.deepEqual(errors,[]);record('No browser runtime or resource errors');
+  const report={browser:await cdp('Browser.getVersion'),checks,errors,...details,limits:['Campaign GUI win tests use explicit scenarios; not a normal-world human playthrough','Audio verified by Web Audio state and event execution, not a listening test']};await writeFile(resolve(proof,'browser-qa.json'),JSON.stringify(report,null,2)+'\n');
+  console.log('Browser QA passed: '+checks.length+' checks. FPS: '+details.performance.fps.toFixed(1));
+}catch(error){await writeFile(resolve(proof,'browser-failure.json'),JSON.stringify({message:error.message,checks,errors,details},null,2)+'\n');await shot('failure').catch(()=>{});throw error;}
+finally{await cdp('Page.navigate',{url:'about:blank'}).catch(()=>{});socket.close();}
