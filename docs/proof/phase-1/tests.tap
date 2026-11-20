@@ -1,0 +1,130 @@
+TAP version 13
+# Subtest: CLI JSONL tick model, inputs persistence, end last, exact determinism
+ok 1 - CLI JSONL tick model, inputs persistence, end last, exact determinism
+  ---
+  duration_ms: 149.9801
+  type: 'test'
+  ...
+# Subtest: invalid JSON or schema returns code 2 and stderr
+ok 2 - invalid JSON or schema returns code 2 and stderr
+  ---
+  duration_ms: 223.417
+  type: 'test'
+  ...
+# Subtest: duplicate/unknown arguments are nonzero; malformed path is exit 2
+ok 3 - duplicate/unknown arguments are nonzero; malformed path is exit 2
+  ---
+  duration_ms: 149.2734
+  type: 'test'
+  ...
+# Subtest: zero steps emits only snapshot zero and end; terminal exits early
+ok 4 - zero steps emits only snapshot zero and end; terminal exits early
+  ---
+  duration_ms: 98.7036
+  type: 'test'
+  ...
+# Subtest: tick zero is untouched; movement persists; yaw and diagonal normalized
+ok 5 - tick zero is untouched; movement persists; yaw and diagonal normalized
+  ---
+  duration_ms: 3.8989
+  type: 'test'
+  ...
+# Subtest: jump edge; gravity; no repeating jump while held; XZ pickup ignores height
+ok 6 - jump edge; gravity; no repeating jump while held; XZ pickup ignores height
+  ---
+  duration_ms: 0.8186
+  type: 'test'
+  ...
+# Subtest: inclusive pickup radius, capacity and pickup event ticks
+ok 7 - inclusive pickup radius, capacity and pickup event ticks
+  ---
+  duration_ms: 0.359
+  type: 'test'
+  ...
+# Subtest: deposit partial, rising edge, inclusive radius, only remaining amount
+ok 8 - deposit partial, rising edge, inclusive radius, only remaining amount
+  ---
+  duration_ms: 0.4836
+  type: 'test'
+  ...
+# Subtest: win once, bonus declared in tuning, scenario lights earn zero
+ok 9 - win once, bonus declared in tuning, scenario lights earn zero
+  ---
+  duration_ms: 0.5933
+  type: 'test'
+  ...
+# Subtest: pulse exact radius, cost, push, stun, cooldown and release edge
+ok 10 - pulse exact radius, cost, push, stun, cooldown and release edge
+  ---
+  duration_ms: 2.8462
+  type: 'test'
+  ...
+# Subtest: no pulse with insufficient carried; shade chase moves toward player
+ok 11 - no pulse with insufficient carried; shade chase moves toward player
+  ---
+  duration_ms: 0.4717
+  type: 'test'
+  ...
+# Subtest: hit radius, invulnerability exact duration, dropped zero and loss
+ok 12 - hit radius, invulnerability exact duration, dropped zero and loss
+  ---
+  duration_ms: 1.6746
+  type: 'test'
+  ...
+# Subtest: lit lantern protects; shade cannot enter or pass through safe circle
+ok 13 - lit lantern protects; shade cannot enter or pass through safe circle
+  ---
+  duration_ms: 3.9909
+  type: 'test'
+  ...
+# Subtest: dawn and initial time override; zero ticks does not finish setup
+ok 14 - dawn and initial time override; zero ticks does not finish setup
+  ---
+  duration_ms: 0.8009
+  type: 'test'
+  ...
+# Subtest: random false never spawns; empty scenario arrays replace defaults
+ok 15 - random false never spawns; empty scenario arrays replace defaults
+  ---
+  duration_ms: 1.2181
+  type: 'test'
+  ...
+# Subtest: seeded games and generated ids deterministic; random shade spawn event
+ok 16 - seeded games and generated ids deterministic; random shade spawn event
+  ---
+  duration_ms: 21.9958
+  type: 'test'
+  ...
+# Subtest: explicit shade ids cannot collide with automatic ones
+ok 17 - explicit shade ids cannot collide with automatic ones
+  ---
+  duration_ms: 0.1728
+  type: 'test'
+  ...
+# Subtest: island edge prevents falling, default lantern count is five
+ok 18 - island edge prevents falling, default lantern count is five
+  ---
+  duration_ms: 1.3675
+  type: 'test'
+  ...
+# Subtest: scenario coordinates remain untouched at tick zero and outside island setup
+ok 19 - scenario coordinates remain untouched at tick zero and outside island setup
+  ---
+  duration_ms: 0.5177
+  type: 'test'
+  ...
+# Subtest: validation rejects malformed, duplicate ticks, invalid type/range/id
+ok 20 - validation rejects malformed, duplicate ticks, invalid type/range/id
+  ---
+  duration_ms: 1.7559
+  type: 'test'
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1158.4376

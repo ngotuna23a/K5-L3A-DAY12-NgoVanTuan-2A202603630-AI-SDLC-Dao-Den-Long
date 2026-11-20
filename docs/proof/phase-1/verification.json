@@ -1,0 +1,105 @@
+{
+  "node": "v22.23.5",
+  "machine": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpu": "11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz"
+  },
+  "cases": [
+    {
+      "name": "win",
+      "ticks": 60,
+      "inputs": true,
+      "state": "won",
+      "endTick": 9,
+      "event": "lantern_lit",
+      "eventCount": 5,
+      "result": {
+        "type": "end",
+        "ticks": 9,
+        "state": "won",
+        "score": 1888
+      },
+      "deterministic": true
+    },
+    {
+      "name": "pulse",
+      "ticks": 10,
+      "inputs": true,
+      "state": "playing",
+      "endTick": 10,
+      "event": "pulse",
+      "eventCount": 1,
+      "result": {
+        "type": "end",
+        "ticks": 10,
+        "state": "playing",
+        "score": 25
+      },
+      "deterministic": true
+    },
+    {
+      "name": "no-flames",
+      "ticks": 60,
+      "state": "lost",
+      "endTick": 1,
+      "event": "player_hit",
+      "eventCount": 1,
+      "result": {
+        "type": "end",
+        "ticks": 1,
+        "state": "lost",
+        "score": 0
+      },
+      "deterministic": true
+    },
+    {
+      "name": "dawn",
+      "ticks": 60,
+      "state": "lost",
+      "endTick": 3,
+      "event": "game_over",
+      "eventCount": 1,
+      "result": {
+        "type": "end",
+        "ticks": 3,
+        "state": "lost",
+        "score": 0
+      },
+      "deterministic": true
+    },
+    {
+      "name": "default-play",
+      "seed": 202603630,
+      "deterministic": true,
+      "result": {
+        "type": "end",
+        "ticks": 1228,
+        "state": "won",
+        "score": 2018
+      },
+      "description": "Default world, no scenario override, input-only bot replayed by public CLI"
+    }
+  ],
+  "http": "8 checks passed",
+  "source_sha256": {
+    "game.contract.json": "85bc4cf6203ab8dd68c5814311168e4b172b544d97a1c072d80149480918674f",
+    "src/game.mjs": "90bc98f3cd34bac3142f80176888270116d0abaaf9b467a0dee2c8c7c4d3545f",
+    "src/validation.mjs": "1c3b9908b8b4f97b530bac23d446cb6984c0747373e86aa399326c30feee2682",
+    "src/headless.mjs": "7a30b602ae55ce826e4848d0bbb91eba8082722d02eef61b404ff90ca1654207",
+    "src/browser.mjs": "f0479a02c7a527cfe5be86735ab86febc434354c1b6c65b01feb5a0c5393206f",
+    "tests/game.test.mjs": "0e65b654ac68dbe958287cf2b19f2f457443a87fb48352354052e0065e02618b",
+    "tests/cli.test.mjs": "6c23c12cdb54f0f95601b091cb445894b6899b6e1d7a659d2a668a91a7e01378",
+    "scripts/autoplay.mjs": "09a92898eca0918fae1a8a92bc20101cbecc8e5f8e61ae7387947ba6b7b00ecb",
+    "scripts/verify.mjs": "45ba7612d69e70db5c783afe293d4bcc725f45d310849131f1ee51d244f87aa9",
+    "scripts/build.mjs": "da1c3eb532e2734066bda0b5361390f92ed2aa6d292149819a0e1452727332c1",
+    "index.html": "6358cb64a5c942d0e13216148f520b87cdc7f57ec4fa94d7683673fc77973465",
+    "style.css": "70c7788f849010e781fb299ee70a33418318b3a8c90f5a204abbffce85f79f16",
+    "package-lock.json": "c1ef2cfd20ef951190b09be79de949e37a35c643fbe74d3536056a9ecc458ec7"
+  },
+  "limits": [
+    "Results apply to the machine recorded above; CI records its own environment",
+    "Browser QA recorded separately in browser-qa.json",
+    "Compare source SHA-256 with the intended phase tag"
+  ]
+}

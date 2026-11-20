@@ -1,0 +1,29 @@
+{
+  "contract_version": "1.0",
+  "team": "2A202603630-NgoVanTuan",
+  "build_cmd": "npm ci && npm run build",
+  "run_cmd": "npm start",
+  "headless_cmd": "node src/headless.mjs",
+  "tuning": {
+    "player_speed": 6,
+    "carry_capacity": 16,
+    "lantern_cost": 8,
+    "lantern_count_night1": 5,
+    "pickup_radius": 1.2,
+    "interact_radius": 3,
+    "pulse_cost": 2,
+    "pulse_radius": 6,
+    "night1_duration_s": 300,
+    "flames": 3,
+    "invuln_s": 2,
+    "hit_drop_ratio": 0,
+    "pulse_stun_s": 2.5,
+    "pulse_push_m": 4,
+    "pulse_cooldown_s": 1,
+    "safe_radius": 5,
+    "shade_speed": 2.1,
+    "shade_hit_radius": 0.85,
+    "fall_enabled": false,
+    "score": { "per_mote": 10, "per_lantern": 150, "per_stun": 25, "per_second_left": 2, "per_flame_left": 100 }
+  }
+}

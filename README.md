@@ -1,3 +1,62 @@
+# Đảo Đèn Lồng — bản triển khai Phase 1
+
+**Demo video:** chưa quay; sẽ bổ sung trước Release cuối. **Ảnh chạy thật:** [gameplay](docs/proof/phase-1/gameplay.png), [màn bắt đầu](docs/proof/phase-1/intro.png), [thắng màn](docs/proof/phase-1/won.png). Tag bàn giao: `phase-1`; Release `v1.0.0` dành cho Phase 4.
+
+**Ngô Văn Tuân · MSSV 2A202603630 · L3A** · 26ai.tuannv3@vinuni.edu.vn
+
+Game 3D góc nhìn thứ ba: điều khiển Mây nhặt đom đóm và thắp lại 5 Đèn Lồng Lớn trên Đảo Bến, tránh Bóng Mực trước bình minh. Node.js >=22; browser hỗ trợ WebGL. Kiểm chứng local trên Windows; CI tự động kiểm tra macOS/Linux khi push, xem kết quả tại [GitHub Actions](https://github.com/ngotuna23a/K5-L3A-DAY12-NgoVanTuan-2A202603630-AI-SDLC-Dao-Den-Long/actions).
+
+## Cài và chơi — 3 lệnh
+
+```sh
+npm ci
+npm run build
+npm start
+```
+
+Mở **http://localhost:4173**, nhấn **Mang ánh sáng về đảo**. Build `dist/` là web tĩnh, chứa sẵn Three.js và license; không tải CDN/font/asset ngoài. Phải phục vụ bằng HTTP, không mở `index.html` bằng `file://`.
+
+## Điều khiển và luật chơi
+
+| Phím | Hành động |
+|---|---|
+| WASD / phím mũi tên | Di chuyển theo camera |
+| Space | Nhảy |
+| E | Nạp đom đóm vào đèn gần nhất trong 3 m |
+| Q | Tỏa sáng, dùng 2 đom đóm, stun và đẩy Bóng Mực |
+| Kéo chuột / lăn chuột | Xoay / zoom camera |
+| Esc / nút Tạm dừng | Tạm dừng, tiếp tục |
+
+Nhặt bằng cách đến gần; mang tối đa 16, mỗi đèn cần 8. Đèn đã sáng bảo vệ bán kính 5 m. Có 3 máu, đêm dài 300 s; hết đèn chưa sáng thì thắng, hết máu hoặc hết giờ thì thua. Mép đảo chặn bước đi, không phạt rơi. Sau thắng/thua chọn **Chơi lại Đêm 1**. Âm thanh tổng hợp là tùy chọn, bật bằng nút trên cùng. Khi rời tab game tự tạm dừng.
+
+Điểm: +10/đom đóm, +150/đèn, +25/Bóng Mực mới bị stun. Khi thắng thêm `floor(time_left_s) × 2 + flames × 100`, cộng đúng một lần; khi thua không thưởng cuối. Tuning đầy đủ ở [game.contract.json](game.contract.json); giả định và ưu tiên sự kiện ở [ghi chép Phase 1](docs/notes/phase-1.md).
+
+## Test và headless
+
+```sh
+npm test
+npm run verify
+```
+
+`verify` là gate bàn giao: test → build → 4 scenario nhỏ và một lần chơi toàn màn mặc định có assertion và so output hai lần → HTTP smoke test; lỗi bất kỳ trả mã khác 0. Bằng chứng tự ghi vào [docs/proof/phase-1](docs/proof/phase-1), gồm TAP, JSONL nguyên bản, thông tin máy và hash source.
+
+```sh
+node src/headless.mjs --seed 42 --night 1 --ticks 600 --out result.jsonl
+node src/headless.mjs --seed 42 --night 1 --scenario tests/scenarios/win.json --inputs tests/scenarios/win-inputs.json --ticks 60 --snapshot-every 1 --out win.jsonl
+```
+
+Headless không cần WebGL/GPU/Three.js: fixed step 60 Hz; snapshot tick 0 trước input; mỗi input k sinh trạng thái/event k+1; nút kích hoạt false→true; input thiếu giữ trạng thái. Khoảng cách theo XZ, inclusive; JSONL làm tròn tọa độ 3 chữ số. Hỗ trợ seed, night, scenario, inputs, ticks, out, snapshot-every theo Contract v1.0. End luôn ở dòng cuối, dừng sớm khi thắng/thua. File inputs/scenario sai định dạng trả exit 2/stderr, lỗi CLI/runtime khác trả mã khác 0. Chạy lại cùng seed/scenario/inputs có output giống hệt. Các giá trị tuning đều đang được dùng; không có mục null.
+
+Scenario `win` gom 5 đèn về một chỗ để kiểm chứng đường đi thắng. `default-play.jsonl` là bằng chứng bot thắng màn mặc định bằng input bình thường, không dùng scenario override; chạy lại bằng seed `202603630` và `docs/proof/phase-1/default-play-inputs.json`. Các scenario khác: pulse, hết máu, bình minh. Browser QA và ảnh được tạo bằng Chrome cài sẵn, qua CDP với `scripts/browser-qa.mjs`; không cài framework test browser. Xem [phạm vi bằng chứng](docs/proof/phase-1/README.md).
+
+## Sáng tạo của tôi
+
+Mây đội nón lá và mang đèn nhỏ; đảo nổi giữa biển mây, đom đóm lập lòe, vòng ánh sáng khi tỏa sáng, âm thanh Web Audio tổng hợp và minimap hiển thị nơi trú ẩn. Đèn sáng dần làm đảo ấm hơn. Các chi tiết này thuộc renderer; cùng một `src/game.mjs` chạy browser/headless, không thêm thực thể gameplay ngoài contract. Bằng chứng hồi quy: `npm run verify`; ảnh browser nằm ở đầu README.
+
+Harness dùng thực tế: [AGENTS.md](AGENTS.md), gate `scripts/verify.mjs`, `scripts/browser-qa.mjs`, CI `.github/workflows/verify.yml`. Giữ nguyên các tài liệu lab ban đầu bên dưới. Quyền và nguồn xem [CREDITS.md](CREDITS.md), [LICENSE](LICENSE).
+
+---
+
 # Day 12 — AI SDLC: Đảo Đèn Lồng
 
 > **Cá nhân** (1 người / 1 MSSV) · Áp dụng SDLC cùng AI để xây một **game 3D** qua **4 phase**, từ yêu cầu ban đầu tới bản phát hành.

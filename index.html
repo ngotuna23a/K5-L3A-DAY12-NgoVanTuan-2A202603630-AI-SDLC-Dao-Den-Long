@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101929">
+  <meta name="description" content="Cùng Mây gom đom đóm, thắp lại năm ngọn đèn và đưa ánh sáng về Đảo Bến. Game 3D Đảo Đèn Lồng.">
+  <title>Đảo Đèn Lồng · Đêm 1</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='14' y='12' width='36' height='44' rx='16' fill='%23ffce79'/%3E%3Cpath d='M23 10h18M32 0v10M32 56v8' stroke='%23b78142' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head>
+<body>
+  <main id="game" aria-label="Game 3D Đảo Đèn Lồng">
+    <canvas id="world" tabindex="0" aria-label="Đảo Bến, dùng WASD để điều khiển Mây"></canvas>
+    <header class="topbar">
+      <div class="brand"><span class="brand-lantern" aria-hidden="true">✦</span><div>ĐẢO ĐÈN LỒNG<small>ĐÊM 1 <span> / </span> ĐẢO BẾN</small></div></div>
+      <div class="lantern-progress" aria-label="Tiến độ thắp đèn"><div id="lantern-dots">○ ○ ○ ○ ○</div><span id="lantern-count">0 / 5 đèn đã sáng</span></div>
+      <div class="top-actions"><button id="sound" class="quiet-button" aria-pressed="false">Âm thanh: tắt</button><button id="pause" class="quiet-button">Tạm dừng</button></div>
+    </header>
+    <section class="stats" aria-label="Thông tin người chơi">
+      <div class="stat"><span class="stat-label">NGỌN LỬA</span><strong id="health" aria-label="3 máu">♦ ♦ ♦</strong></div>
+      <div class="stat"><span class="stat-label">ĐOM ĐÓM</span><strong><span id="carried">0</span><small> / 16</small></strong><div class="meter"><i id="carry-meter"></i></div></div>
+      <div class="stat"><span class="stat-label">TRƯỚC BÌNH MINH</span><strong id="timer">05:00</strong></div>
+      <div class="stat"><span class="stat-label">ĐIỂM</span><strong id="score">0</strong></div>
+    </section>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="interaction" class="interaction" hidden><kbd>E</kbd><span>Nạp ánh sáng</span></div>
+    <aside class="island-note"><span class="eyebrow">GIỮ MỘT CHÚT SÁNG TRONG ĐÊM</span><p id="objective">Gom đom đóm. Thắp đèn. Tìm đường về.</p><span id="pulse-status">Tỏa sáng · Q · 2 đom đóm</span></aside>
+    <aside class="map-panel" aria-label="Bản đồ đảo"><canvas id="map" width="220" height="220" aria-label="Vàng: đèn, tím: Bóng Mực, trắng: Mây"></canvas><span>ĐẢO BẾN <i>● MÂY</i></span></aside>
+    <footer class="controls"><span><kbd>W A S D</kbd> Di chuyển</span><span><kbd>Space</kbd> Nhảy</span><span><kbd>E</kbd> Nạp đèn</span><span><kbd>Q</kbd> Tỏa sáng</span><span class="camera-help">Kéo chuột · Xoay camera</span></footer>
+    <div class="touch-controls" aria-label="Điều khiển cảm ứng"><div class="dpad"><button data-key="KeyW" aria-label="Tiến">W</button><button data-key="KeyA" aria-label="Trái">A</button><button data-key="KeyS" aria-label="Lùi">S</button><button data-key="KeyD" aria-label="Phải">D</button></div><div><button data-key="Space">Nhảy</button><button data-key="KeyE">Nạp</button><button data-key="KeyQ">Tỏa sáng</button></div></div>
+    <section id="overlay" class="overlay" aria-labelledby="panel-title">
+      <div class="intro-card">
+        <span class="eyebrow" id="panel-eyebrow">MỘT HÀNH TRÌNH NHỎ GIỮA BIỂN MÂY</span>
+        <h1 id="panel-title">Đêm còn dài.<br><em>Đèn còn đợi.</em></h1>
+        <p id="panel-description">Sương đen đã che lấp Đảo Bến. Cùng Mây nhặt những đốm sáng bé xíu, thắp lại <b>5 Đèn Lồng Lớn</b> trước bình minh.</p>
+        <div class="intro-rules" id="intro-rules"><div><span>✦</span>Gom 8 đom đóm để thắp một đèn.</div><div><span>◉</span>Nhấn Q để xua Bóng Mực, tốn 2 đom đóm.</div><div><span>☼</span>Đèn đã sáng là nơi trú ẩn an toàn.</div></div>
+        <button id="play" class="primary-button" disabled>Đang thắp chiếc đèn đầu tiên…</button>
+        <span class="intro-footnote">WASD di chuyển · Space nhảy · E nạp đèn · Q tỏa sáng</span>
+      </div>
+    </section>
+    <div id="fatal" class="fatal" role="alert" hidden></div>
+  </main>
+  <script type="module" src="./src/browser.mjs"></script>
+</body>
+</html>
