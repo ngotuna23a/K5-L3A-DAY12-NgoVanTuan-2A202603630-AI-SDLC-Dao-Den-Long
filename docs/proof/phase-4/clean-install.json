@@ -1,0 +1,36 @@
+{
+  "node": "v22.23.5",
+  "source": "ZIP extracted with Python zipfile CRC validation",
+  "cwd": "D:\\K5-L3-LAB-Day12-NgoVanTuan-AI-SDLC\\tmp\\release-smoke-20261121\\dao-den-long-v1.0.0",
+  "commands": [
+    {
+      "command": "npm ci",
+      "exit_code": 0,
+      "stdout": "\nadded 1 package, and audited 2 packages in 59s\n\nfound 0 vulnerabilities\n",
+      "stderr": ""
+    },
+    {
+      "command": "npm run build",
+      "exit_code": 0,
+      "stdout": "\n> dao-den-long@1.0.0 build\n> node scripts/build.mjs\n\nBuilt dist/ (Three.js 0.187.0, no CDN)\n",
+      "stderr": ""
+    }
+  ],
+  "start_script": "node scripts/serve.mjs",
+  "start_check": "Imported same server entrypoint on ephemeral port for controlled teardown; HTTP modules and disk API verified",
+  "checks": [
+    "/",
+    "/style.css",
+    "/src/browser.mjs",
+    "/src/game.mjs",
+    "/src/settings.mjs",
+    "/src/benchmark.mjs",
+    "/vendor/three.module.js",
+    "/vendor/THREE-LICENSE.txt",
+    "/game.contract.json",
+    "API rejects invalid name",
+    "API disk persists across server restart",
+    "New CLI process exports identical board"
+  ],
+  "passed": true
+}

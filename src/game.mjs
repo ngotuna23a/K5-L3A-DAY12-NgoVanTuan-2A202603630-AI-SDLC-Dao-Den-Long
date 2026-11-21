@@ -170,13 +170,7 @@ export class Game{
       if(s.state==='chase'&&distance>18)s.state='wander';
       else if(s.state==='wander'&&distance<=12)s.state='chase';
       if(s.state==='chase'){const d=direction(s.pos,p.pos);const speed=this.night===3?this.t.shade_speed_night3:this.t.shade_speed;const step=Math.min(distance,speed*DT);this.moveShade(s,d[0]*step,d[1]*step);}
-      else{
-        const weak=this.lanterns.filter(l=>l.lit&&l.fuelUnits<this.t.low_fuel_threshold*60);
-        const targets=(weak.length?weak:this.lanterns.filter(l=>!l.lit)).sort((a,b)=>xzDistance(s.pos,a.pos)-xzDistance(s.pos,b.pos)||idOrder(a,b));
-        const target=targets[0];s.targetLanternId=target?.id??null;
-        if(target){const d=direction(s.pos,target.pos),distance=xzDistance(s.pos,target.pos);if(!(target.lit&&distance<=2+EPS)){const step=Math.min(distance,2*DT);this.moveShade(s,d[0]*step,d[1]*step);}if(target.lit&&xzDistance(s.pos,target.pos)<=2+EPS){s.state='drain';s.drainTicks=0;}}
-        else{if((this.simTick+s.id.length)%120===0){const a=this.random()*Math.PI*2;s.wander=[Math.cos(a),Math.sin(a)];}this.moveShade(s,s.wander[0]*2*DT,s.wander[1]*2*DT);}
-      }
+      else this.wanderShade(s);
     }
     for(const d of this.drifters){
       if(d.state==='flee'){d.pos[0]+=d.fleeDir[0]*7*DT;d.pos[2]+=d.fleeDir[1]*7*DT;continue;}
@@ -186,6 +180,13 @@ export class Game{
       const dir=chasing?direction(d.pos,p.pos):direction(d.pos,[d.home[0]+3*Math.cos(angle),d.pos[1],d.home[2]+3*Math.sin(angle)]);
       d.pos[0]+=dir[0]*(chasing?7:2)*DT;d.pos[2]+=dir[1]*(chasing?7:2)*DT;
     }
+  }
+  wanderShade(s){
+    const weak=this.lanterns.filter(l=>l.lit&&l.fuelUnits<this.t.low_fuel_threshold*60);
+    const targets=(weak.length?weak:this.lanterns.filter(l=>!l.lit)).sort((a,b)=>xzDistance(s.pos,a.pos)-xzDistance(s.pos,b.pos)||idOrder(a,b));
+    const target=targets[0];s.targetLanternId=target?.id??null;
+    if(target){const d=direction(s.pos,target.pos),distance=xzDistance(s.pos,target.pos);if(!(target.lit&&distance<=2+EPS)){const step=Math.min(distance,2*DT);this.moveShade(s,d[0]*step,d[1]*step);}if(target.lit&&xzDistance(s.pos,target.pos)<=2+EPS){s.state='drain';s.drainTicks=0;}}
+    else{if((this.simTick+s.id.length)%120===0){const a=this.random()*Math.PI*2;s.wander=[Math.cos(a),Math.sin(a)];}this.moveShade(s,s.wander[0]*2*DT,s.wander[1]*2*DT);}
   }
   contact(){
     const p=this.player;if(p.respawnTicks>0)return;

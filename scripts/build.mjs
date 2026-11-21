@@ -2,7 +2,7 @@ import { mkdir, copyFile, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
-const files = ['index.html', 'style.css', 'game.contract.json', 'src/game.mjs', 'src/world.mjs', 'src/campaign.mjs', 'src/browser.mjs', 'src/audio.mjs', 'LICENSE', 'CREDITS.md'];
+const files = ['index.html', 'style.css', 'game.contract.json', 'src/game.mjs', 'src/world.mjs', 'src/campaign.mjs', 'src/browser.mjs', 'src/audio.mjs', 'src/settings.mjs', 'src/leaderboard.mjs', 'src/benchmark.mjs', 'LICENSE', 'CREDITS.md'];
 for (const file of files) {
   const target = resolve(root, 'dist', file);
   await mkdir(resolve(target, '..'), { recursive: true });

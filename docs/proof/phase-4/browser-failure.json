@@ -1,0 +1,90 @@
+{
+  "message": "Timed out: window.__dao.status().paused",
+  "checks": [
+    "WebGL renders main menu and default Night 1",
+    "Menu to Ông Đăng introduction to gameplay; audio unlocked",
+    "W moves forward",
+    "A/D and arrow keys agree with screen left/right",
+    "Screen left/right remain correct after camera rotation",
+    "Jump lands on the shared terrain",
+    "Shift triggers dash and HUD cooldown",
+    "P pauses simulation, advances only tick, exposes all pause actions",
+    "Volume/sensitivity settings apply and resume works",
+    "Settings persist across reload",
+    "Night 2 bridge/pads/charm and ten-slot HUD render",
+    "Night 2 jump pad launches and lands on the other island",
+    "Gió Lạc steals three and enters flee",
+    "Fall penalty and respawn render correctly",
+    "Q pulses, consumes three and stuns enemy",
+    "Last 30 seconds uses danger color and flashing",
+    "Successful lights expand capacity and the HUD slots",
+    "All lamps lit no longer finishes the night early",
+    "Fuel bars, twenty-percent collapsed/torn unlit lanterns and low-fuel state",
+    "Colorblind mode turns shade eyes/outline blue and warnings white with icon",
+    "Low-fuel blink follows the 30-tick half-cycle (1 Hz)",
+    "Colorblind setting persists across reload",
+    "Night 3 tiers, tower, ramps and strong wind render",
+    "Three-night campaign, Ông Đăng intros, result screens and dawn total",
+    "Loss retries current night with full health",
+    "Measured actual FPS at 1280x720 in Night 3 stress scene"
+  ],
+  "errors": [],
+  "details": {
+    "horizontal": [
+      {
+        "code": "KeyA",
+        "sign": -1,
+        "delta": -0.055546423503656926
+      },
+      {
+        "code": "KeyD",
+        "sign": 1,
+        "delta": 0.06381936574666322
+      },
+      {
+        "code": "ArrowLeft",
+        "sign": -1,
+        "delta": -0.06387430009521061
+      },
+      {
+        "code": "ArrowRight",
+        "sign": 1,
+        "delta": 0.06388570699357969
+      },
+      {
+        "code": "KeyA",
+        "sign": -1,
+        "delta": -0.06821149798677806
+      },
+      {
+        "code": "KeyD",
+        "sign": 1,
+        "delta": 0.06467829939844566
+      }
+    ],
+    "campaign": {
+      "scenarioBased": true,
+      "scores": [
+        1040,
+        1188,
+        1336
+      ],
+      "total": 3564
+    },
+    "performance": {
+      "frames": 345,
+      "fps": 56.55104389281605,
+      "width": 1280,
+      "height": 720,
+      "pixelRatio": 1,
+      "threshold_fps": 30,
+      "measurement_s": 6,
+      "passed": true
+    },
+    "renderer": {
+      "calls": 63,
+      "triangles": 9488,
+      "gpu": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x00009A49) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+    }
+  }
+}

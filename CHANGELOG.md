@@ -1,5 +1,13 @@
 # Changelog
 
+## Phase 4 — v1.0.0, Contract v1.3 (chờ chốt tag/Release)
+
+- Giữ luật v1.2; thêm bench_cmd/soak_cmd, scene chuẩn 200/100 và raw frame timing, RSS soak một process.
+- Leaderboard top 10 trên đĩa, tên/schema/time tie, UI sau loss/dawn và CLI export cùng nguồn.
+- Remap 9 hành động, conflict/restore/persist; captions/edge arrow, reduce motion, chữ ≥18 px và ×1.25.
+- 71 test, browser regression riêng, evidence Phase 4; ZIP tự chứa runtime, demo MP4, retro bốn phase.
+- Benchmark local p1 còn dưới mốc 30 FPS; công bố số đo thật trong bench.json/README. Tag phase-4 và Release v1.0.0 cần chủ bài chốt.
+
 ## Phase 3 — Contract v1.2, tag phase-3
 
 Breaking changes:

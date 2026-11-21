@@ -8,3 +8,4 @@
 - Harness: `AGENTS.md`, `scripts/verify.mjs`, `scripts/browser-qa.mjs`, workflow CI. Skill hỗ trợ quy trình triển khai web: `sites:sites` của OpenAI; công việc hiện tại nằm trong local Git repository.
 - Phase 2: bản đồ/số liệu theo Ticket-02; nhạc nền, SFX, Gió Lạc, Bùa Gió và geometry ba Đêm được dựng bằng code, không dùng asset ngoài. Các ảnh proof là screenshot Chrome chạy thật.
 - Phase 3: luật theo Ticket-03; thanh dầu, hình giấy rách/xẹp, cảnh báo và palette dễ phân biệt được tạo bằng code. Ảnh proof là screenshot không chỉnh sửa.
+- Phase 4: leaderboard, accessibility và benchmark dựng bằng code; không thêm asset ngoài. Video ghi Chrome thật qua CDP, mã hóa MPEG-4 bằng Python/OpenCV 4.13.0 có sẵn (https://opencv.org/, Apache-2.0), không có audio track. Python/OpenCV chỉ dùng tái ghi video, không đóng kèm trong game và không là dependency runtime. Script đóng ZIP dùng Node standard library. Tài liệu/retro có hỗ trợ OpenAI Codex, chủ bài chịu trách nhiệm review.

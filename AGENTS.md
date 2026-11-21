@@ -20,3 +20,7 @@
 - Phase 3: Ticket-03/v1.2 thay dầu/shield/win/capacity/score; ADR ở docs/notes/phase-3.md, breaking changes ở CHANGELOG.md.
 - Dầu nguyên đơn vị 1/60, cập nhật bước 2; không early win all_lit. Dawn cần 60% đèn; no_flames ưu tiên.
 - Giữ evidence cũ, verify ghi docs/proof/phase-3. Không triển khai Ticket-04 khi chỉ yêu cầu Phase 3.
+- Phase 4: docs/requirements/phase-4.txt, Contract v1.3; giữ luật gameplay v1.2. Evidence mới ghi docs/proof/phase-4, không sửa output bằng tay.
+- Benchmark chuẩn phải đủ200 wander/100 motes, 3 đèn100fuel, camera15s/vòng; warmup3s rồi đo thật. Soak dùng một tiến trình, RSS thật, không padding memory.
+- Leaderboard lưu data/ (gitignore), export dùng cùng nguồn. Remap có conflict/restore/persist; mọi UI ≥18px và chữ lớn ×1.25.
+- Chuẩn bị ZIP/demo/retro trước khi xin chốt push/tag phase-4 và Release v1.0.0; sau phase nhắc người dùng chốt.

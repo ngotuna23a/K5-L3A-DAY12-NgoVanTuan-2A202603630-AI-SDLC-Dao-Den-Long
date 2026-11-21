@@ -1,0 +1,436 @@
+TAP version 13
+# Subtest: CLI JSONL tick model, inputs persistence, end last, exact determinism
+ok 1 - CLI JSONL tick model, inputs persistence, end last, exact determinism
+  ---
+  duration_ms: 224.3578
+  type: 'test'
+  ...
+# Subtest: invalid JSON or schema returns code 2 and stderr
+ok 2 - invalid JSON or schema returns code 2 and stderr
+  ---
+  duration_ms: 334.0701
+  type: 'test'
+  ...
+# Subtest: duplicate/unknown arguments are nonzero; malformed path is exit 2
+ok 3 - duplicate/unknown arguments are nonzero; malformed path is exit 2
+  ---
+  duration_ms: 430.7349
+  type: 'test'
+  ...
+# Subtest: zero steps emits only snapshot zero and end; terminal exits early
+ok 4 - zero steps emits only snapshot zero and end; terminal exits early
+  ---
+  duration_ms: 195.0195
+  type: 'test'
+  ...
+# Subtest: v1.1 accepts all nights and emits the required snapshot fields
+ok 5 - v1.1 accepts all nights and emits the required snapshot fields
+  ---
+  duration_ms: 376.5384
+  type: 'test'
+  ...
+# Subtest: CLI pause keeps tick running and uses real ticks for pause events
+ok 6 - CLI pause keeps tick running and uses real ticks for pause events
+  ---
+  duration_ms: 126.3382
+  type: 'test'
+  ...
+# Subtest: standard tuning values match Ticket-02
+ok 7 - standard tuning values match Ticket-02
+  ---
+  duration_ms: 2.3959
+  type: 'test'
+  ...
+# Subtest: standard maps, lantern positions, spawn points and zero setup events/score
+ok 8 - standard maps, lantern positions, spawn points and zero setup events/score
+  ---
+  duration_ms: 5.8472
+  type: 'test'
+  ...
+# Subtest: tick model, persistent movement, yaw and diagonal normalization regression
+ok 9 - tick model, persistent movement, yaw and diagonal normalization regression
+  ---
+  duration_ms: 4.8293
+  type: 'test'
+  ...
+# Subtest: jump only on ground; full air control; held jump never repeats
+ok 10 - jump only on ground; full air control; held jump never repeats
+  ---
+  duration_ms: 2.7777
+  type: 'test'
+  ...
+# Subtest: inclusive pickup, cap, height and no points for picking up
+ok 11 - inclusive pickup, cap, height and no points for picking up
+  ---
+  duration_ms: 0.9947
+  type: 'test'
+  ...
+# Subtest: deposit nearest unlit, tie by numeric id, partial progress and edge activation
+ok 12 - deposit nearest unlit, tie by numeric id, partial progress and edge activation
+  ---
+  duration_ms: 18.5609
+  type: 'test'
+  ...
+# Subtest: win priority at dawn, standardized points and bonus exactly once
+ok 13 - win priority at dawn, standardized points and bonus exactly once
+  ---
+  duration_ms: 1.2756
+  type: 'test'
+  ...
+# Subtest: no flames has priority over all lights and dawn
+ok 14 - no flames has priority over all lights and dawn
+  ---
+  duration_ms: 0.4416
+  type: 'test'
+  ...
+# Subtest: pulse uses 3D center and inclusive boundary, consumes exactly 3, pushes 4 over 15 ticks
+ok 15 - pulse uses 3D center and inclusive boundary, consumes exactly 3, pushes 4 over 15 ticks
+  ---
+  duration_ms: 10.9167
+  type: 'test'
+  ...
+# Subtest: pulse cooldown and edge, repeated pulse scores on already stunned targets
+ok 16 - pulse cooldown and edge, repeated pulse scores on already stunned targets
+  ---
+  duration_ms: 4.7306
+  type: 'test'
+  ...
+# Subtest: dash speed and 12-tick duration, 90-tick cooldown, held button edge
+ok 17 - dash speed and 12-tick duration, 90-tick cooldown, held button edge
+  ---
+  duration_ms: 1.5752
+  type: 'test'
+  ...
+# Subtest: dash uses movement direction then remembered facing, and holds altitude in air
+ok 18 - dash uses movement direction then remembered facing, and holds altitude in air
+  ---
+  duration_ms: 1.7806
+  type: 'test'
+  ...
+# Subtest: dash grants no invulnerability
+ok 19 - dash grants no invulnerability
+  ---
+  duration_ms: 0.4275
+  type: 'test'
+  ...
+# Subtest: hit drops floor half in annulus, invulnerability 90 ticks, recoil and one hit per tick
+ok 20 - hit drops floor half in annulus, invulnerability 90 ticks, recoil and one hit per tick
+  ---
+  duration_ms: 4.9054
+  type: 'test'
+  ...
+# Subtest: shade contact checks vertical difference
+ok 21 - shade contact checks vertical difference
+  ---
+  duration_ms: 0.2998
+  type: 'test'
+  ...
+# Subtest: stun, chase detection, disengage, spawning and recoil states
+ok 22 - stun, chase detection, disengage, spawning and recoil states
+  ---
+  duration_ms: 1.1329
+  type: 'test'
+  ...
+# Subtest: safe zone expels in 30 ticks without damage and blocks re-entry
+ok 23 - safe zone expels in 30 ticks without damage and blocks re-entry
+  ---
+  duration_ms: 2.4329
+  type: 'test'
+  ...
+# Subtest: fall ignores invulnerability, loses all carried only once, respawns after 60 ticks
+ok 24 - fall ignores invulnerability, loses all carried only once, respawns after 60 ticks
+  ---
+  duration_ms: 0.6392
+  type: 'test'
+  ...
+# Subtest: fall with last flame loses immediately and does not respawn
+ok 25 - fall with last flame loses immediately and does not respawn
+  ---
+  duration_ms: 0.3459
+  type: 'test'
+  ...
+# Subtest: walking beyond island actually falls rather than clamps
+ok 26 - walking beyond island actually falls rather than clamps
+  ---
+  duration_ms: 1.1754
+  type: 'test'
+  ...
+# Subtest: bridge geometry, pads preserve launch and land on other island
+ok 27 - bridge geometry, pads preserve launch and land on other island
+  ---
+  duration_ms: 1.1149
+  type: 'test'
+  ...
+# Subtest: night 3 levels, ramp ascent, vertical walls and bell collision
+ok 28 - night 3 levels, ramp ascent, vertical walls and bell collision
+  ---
+  duration_ms: 2.1347
+  type: 'test'
+  ...
+# Subtest: night 3 pad reaches upper level
+ok 29 - night 3 pad reaches upper level
+  ---
+  duration_ms: 1.1517
+  type: 'test'
+  ...
+# Subtest: charms refresh effect, boosted run, free cooldown dash and 2700 tick respawn
+ok 30 - charms refresh effect, boosted run, free cooldown dash and 2700 tick respawn
+  ---
+  duration_ms: 0.6094
+  type: 'test'
+  ...
+# Subtest: charm expires after 600 gameplay ticks
+ok 31 - charm expires after 600 gameplay ticks
+  ---
+  duration_ms: 0.206
+  type: 'test'
+  ...
+# Subtest: drifter chase requires five carried, steals once before shade damage even if invulnerable
+ok 32 - drifter chase requires five carried, steals once before shade damage even if invulnerable
+  ---
+  duration_ms: 0.7921
+  type: 'test'
+  ...
+# Subtest: drifter pulse forces flee, second pulse returns stolen motes with TTL
+ok 33 - drifter pulse forces flee, second pulse returns stolen motes with TTL
+  ---
+  duration_ms: 1.7032
+  type: 'test'
+  ...
+# Subtest: drifter does not chase poor player, ignores safe zone, disappears after 240 flee ticks
+ok 34 - drifter does not chase poor player, ignores safe zone, disappears after 240 flee ticks
+  ---
+  duration_ms: 0.3119
+  type: 'test'
+  ...
+# Subtest: pause freezes every gameplay counter/spawn/TTL while tick and edges continue
+ok 35 - pause freezes every gameplay counter/spawn/TTL while tick and edges continue
+  ---
+  duration_ms: 0.2944
+  type: 'test'
+  ...
+# Subtest: spawn schedules exact ticks, newborns interact next tick and no overlapping random motes
+ok 36 - spawn schedules exact ticks, newborns interact next tick and no overlapping random motes
+  ---
+  duration_ms: 50.3087
+  type: 'test'
+  ...
+# Subtest: wind warning, active timing, displacement, duration and pause
+ok 37 - wind warning, active timing, displacement, duration and pause
+  ---
+  duration_ms: 22.5357
+  type: 'test'
+  ...
+# Subtest: dropped TTL expiry and score not granted on setup
+ok 38 - dropped TTL expiry and score not granted on setup
+  ---
+  duration_ms: 0.4669
+  type: 'test'
+  ...
+# Subtest: same seed deterministic for all nights and generated ids never collide
+ok 39 - same seed deterministic for all nights and generated ids never collide
+  ---
+  duration_ms: 251.2687
+  type: 'test'
+  ...
+# Subtest: scenario positions exactly preserved at tick zero
+ok 40 - scenario positions exactly preserved at tick zero
+  ---
+  duration_ms: 0.2963
+  type: 'test'
+  ...
+# Subtest: pulse push completes in first 15 ticks even during safe-zone expulsion
+ok 41 - pulse push completes in first 15 ticks even during safe-zone expulsion
+  ---
+  duration_ms: 0.6548
+  type: 'test'
+  ...
+# Subtest: recoil moves two meters over 60 ticks after hit
+ok 42 - recoil moves two meters over 60 ticks after hit
+  ---
+  duration_ms: 0.4443
+  type: 'test'
+  ...
+# Subtest: dropped motes cannot be collected in hit tick but can be picked up on next tick
+ok 43 - dropped motes cannot be collected in hit tick but can be picked up on next tick
+  ---
+  duration_ms: 0.257
+  type: 'test'
+  ...
+# Subtest: campaign flow counts only won nights and retries current night
+ok 44 - campaign flow counts only won nights and retries current night
+  ---
+  duration_ms: 0.7185
+  type: 'test'
+  ...
+# Subtest: validation keeps strict frames and accepts v1.1 scenario fields
+ok 45 - validation keeps strict frames and accepts v1.1 scenario fields
+  ---
+  duration_ms: 1.8013
+  type: 'test'
+  ...
+# Subtest: v1.2 tuning, initial lantern schema and no setup rewards
+ok 46 - v1.2 tuning, initial lantern schema and no setup rewards
+  ---
+  duration_ms: 4.828
+  type: 'test'
+  ...
+# Subtest: fuel decays exactly 1/60 each step, expires on step 6000 and resets deposited
+ok 47 - fuel decays exactly 1/60 each step, expires on step 6000 and resets deposited
+  ---
+  duration_ms: 46.409
+  type: 'test'
+  ...
+# Subtest: refuel ceiling uses unrounded fuel after decay, clamps at max and consumes exact amount
+ok 48 - refuel ceiling uses unrounded fuel after decay, clamps at max and consumes exact amount
+  ---
+  duration_ms: 0.9582
+  type: 'test'
+  ...
+# Subtest: full fuel is ineligible and silent; nearest receivable tie uses numeric id
+ok 49 - full fuel is ineligible and silent; nearest receivable tie uses numeric id
+  ---
+  duration_ms: 21.4954
+  type: 'test'
+  ...
+# Subtest: relighting costs five, increments relit_count/capacity and scores 65
+ok 50 - relighting costs five, increments relit_count/capacity and scores 65
+  ---
+  duration_ms: 0.5581
+  type: 'test'
+  ...
+# Subtest: first light still costs ten and dynamic capacity reaches at most twenty
+ok 51 - first light still costs ten and dynamic capacity reaches at most twenty
+  ---
+  duration_ms: 0.7471
+  type: 'test'
+  ...
+# Subtest: pickup respects increased capacity from successful lights, prelit is not counted
+ok 52 - pickup respects increased capacity from successful lights, prelit is not counted
+  ---
+  duration_ms: 0.9307
+  type: 'test'
+  ...
+# Subtest: all lit is not an early win; full final tick is required
+ok 53 - all lit is not an early win; full final tick is required
+  ---
+  duration_ms: 0.7814
+  type: 'test'
+  ...
+# Subtest: dawn thresholds are 3/5, 4/6 and 5/7; bonus uses floor fuel and health only
+ok 54 - dawn thresholds are 3/5, 4/6 and 5/7; bonus uses floor fuel and health only
+  ---
+  duration_ms: 1.5336
+  type: 'test'
+  ...
+# Subtest: fuel-out on dawn counts before victory, but last-tick relight can save the night
+ok 55 - fuel-out on dawn counts before victory, but last-tick relight can save the night
+  ---
+  duration_ms: 1.0118
+  type: 'test'
+  ...
+# Subtest: last-flame hit at dawn always beats surviving lights
+ok 56 - last-flame hit at dawn always beats surviving lights
+  ---
+  duration_ms: 1.0447
+  type: 'test'
+  ...
+# Subtest: shield boundary exactly thirty, then disappears below thirty
+ok 57 - shield boundary exactly thirty, then disappears below thirty
+  ---
+  duration_ms: 0.725
+  type: 'test'
+  ...
+# Subtest: stacked drain is five per second each plus passive one; events every 60 drain ticks
+ok 58 - stacked drain is five per second each plus passive one; events every 60 drain ticks
+  ---
+  duration_ms: 2.6525
+  type: 'test'
+  ...
+# Subtest: wander enters drain at weak target, stands still, and starts charging next tick
+ok 59 - wander enters drain at weak target, stands still, and starts charging next tick
+  ---
+  duration_ms: 0.5614
+  type: 'test'
+  ...
+# Subtest: wander chooses weak before unlit, breaks ties by id, and chase retains player target
+ok 60 - wander chooses weak before unlit, breaks ties by id, and chase retains player target
+  ---
+  duration_ms: 0.6715
+  type: 'test'
+  ...
+# Subtest: drain exits for nearby player, invalid distance, fuel-out and strong fuel
+ok 61 - drain exits for nearby player, invalid distance, fuel-out and strong fuel
+  ---
+  duration_ms: 0.6101
+  type: 'test'
+  ...
+# Subtest: refueling above thirty ends drain, expels safely in thirty ticks
+ok 62 - refueling above thirty ends drain, expels safely in thirty ticks
+  ---
+  duration_ms: 0.7627
+  type: 'test'
+  ...
+# Subtest: pulse against drain awards total fifteen; stun expiry first returns to wander
+ok 63 - pulse against drain awards total fifteen; stun expiry first returns to wander
+  ---
+  duration_ms: 2.3355
+  type: 'test'
+  ...
+# Subtest: pause freezes passive oil, drain and drain event counters
+ok 64 - pause freezes passive oil, drain and drain event counters
+  ---
+  duration_ms: 0.4413
+  type: 'test'
+  ...
+# Subtest: scenario validation supports successful lights, fuel/history/drain and rejects invalid values
+ok 65 - scenario validation supports successful lights, fuel/history/drain and rejects invalid values
+  ---
+  duration_ms: 1.7215
+  type: 'test'
+  ...
+# Subtest: all actions remap, conflict rejected, aliases do not override a remapped primary
+ok 66 - all actions remap, conflict rejected, aliases do not override a remapped primary
+  ---
+  duration_ms: 3.3752
+  type: 'test'
+  ...
+# Subtest: settings migrate/clamp/restore and include reduced motion and large text
+ok 67 - settings migrate/clamp/restore and include reduced motion and large text
+  ---
+  duration_ms: 0.4508
+  type: 'test'
+  ...
+# Subtest: leaderboard validates names, top ten, chronological ties and exact required fields
+ok 68 - leaderboard validates names, top ten, chronological ties and exact required fields
+  ---
+  duration_ms: 2.6198
+  type: 'test'
+  ...
+# Subtest: leaderboard persists on disk and CLI export uses identical storage and order
+ok 69 - leaderboard persists on disk and CLI export uses identical storage and order
+  ---
+  duration_ms: 169.4027
+  type: 'test'
+  ...
+# Subtest: benchmark exact scene, fixed origin, no fuel/spawn/hit/pickup/end while wander moves
+ok 70 - benchmark exact scene, fixed origin, no fuel/spawn/hit/pickup/end while wander moves
+  ---
+  duration_ms: 148.1788
+  type: 'test'
+  ...
+# Subtest: benchmark camera orbit and FPS percentiles follow definitions
+ok 71 - benchmark camera orbit and FPS percentiles follow definitions
+  ---
+  duration_ms: 0.5776
+  type: 'test'
+  ...
+1..71
+# tests 71
+# suites 0
+# pass 71
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1825.6108

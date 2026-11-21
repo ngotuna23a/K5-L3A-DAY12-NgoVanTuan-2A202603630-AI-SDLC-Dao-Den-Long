@@ -1,0 +1,31 @@
+import{spawn}from'node:child_process';
+import{readFileSync,mkdirSync,writeFileSync}from'node:fs';
+import{once}from'node:events';
+import{resolve}from'node:path';
+import{startServer}from'./serve.mjs';
+import{launchBrowser,delay}from'./browser-driver.mjs';
+// Recording is separate from measurements: capture overhead never enters bench.json.
+mkdirSync('docs/demo',{recursive:true});
+const app=await startServer({port:0,dataFile:resolve('tmp/demo-board.json')}),browser=await launchBrowser({headless:true,url:app.url+'/?qa=1'});
+await browser.until('Boolean(window.__dao)&&!document.getElementById("play").disabled');
+const encoder=spawn(process.env.PYTHON??'python',['scripts/encode-demo.py','docs/demo/demo.mp4'],{stdio:['pipe','pipe','pipe'],windowsHide:true});
+let stdout='',stderr='';encoder.stdout.on('data',b=>stdout+=b);encoder.stderr.on('data',b=>stderr+=b);encoder.stdin.on('error',()=>{});
+const exit=once(encoder,'exit'),chapters=[],start=performance.now();let capturing=true,emitted=0,captureError=null;
+const capture=(async()=>{while(capturing){let shot;try{shot=await browser.page.call('Page.captureScreenshot',{format:'jpeg',quality:80});}catch(e){if(e.message.includes('Not attached to an active page')){await delay(100);continue;}throw e;}const data=Buffer.from(shot.data,'base64'),target=Math.max(emitted+1,Math.round((performance.now()-start)/100)),repeats=target-emitted,header=Buffer.alloc(8);header.writeUInt32LE(data.length);header.writeUInt32LE(repeats,4);emitted=target;if(!encoder.stdin.write(Buffer.concat([header,data])))await once(encoder.stdin,'drain');await delay(80);}})().catch(e=>{captureError=e;capturing=false;});
+const evaluate=browser.evaluate,click=id=>evaluate('document.getElementById('+JSON.stringify(id)+').click()');
+async function chapter(title){chapters.push({time_s:(performance.now()-start)/1000,title});await evaluate(`(()=>{let e=document.getElementById('demo-label');if(!e){e=document.createElement('div');e.id='demo-label';e.style='position:fixed;bottom:8px;left:8px;z-index:1000;background:#0e1430ee;color:#ffe9b0;padding:8px 16px;font:18px system-ui;border-radius:8px';document.body.append(e);}e.textContent=${JSON.stringify(title)};})()`);}
+async function key(code,key,type){await browser.page.call('Input.dispatchKeyEvent',{type,code,key,windowsVirtualKeyCode:key.length===1?key.toUpperCase().charCodeAt(0):({Space:32,ShiftLeft:16})[code]??0});}
+try{
+  await browser.until('Boolean(window.__dao)&&!document.getElementById("play").disabled');await chapter('Đảo Đèn Lồng · Ngô Văn Tuân · 2A202603630 · L3A');await delay(2500);await click('play');await delay(2000);await click('play');await chapter('Gameplay mặc định · input keyboard tự động, không sửa state');
+  for(const [code,k,ms]of[['KeyW','w',2100],['KeyD','d',1800],['Space',' ',600],['KeyA','a',2000],['ShiftLeft','Shift',400],['KeyS','s',2200],['KeyE','e',300],['KeyQ','q',300]]){await key(code,k,'keyDown');await delay(ms);await key(code,k,'keyUp');await delay(450);}
+  await click('pause');await browser.until('window.__dao.status().paused');await click('panel-settings');await chapter('Accessibility · remap, conflict, chữ lớn và giảm chuyển động');
+  await evaluate('document.getElementById("large-text").checked=true;document.getElementById("large-text").dispatchEvent(new Event("input"));document.getElementById("reduce-motion").checked=true;document.getElementById("reduce-motion").dispatchEvent(new Event("input"));document.getElementById("bindings").scrollIntoView({block:"center"})');await delay(3500);await evaluate('document.querySelector("[data-bind-action=left]").click()');await key('KeyD','d','keyDown');await key('KeyD','d','keyUp');await delay(2000);await key('KeyJ','j','keyDown');await key('KeyJ','j','keyUp');await delay(1500);await click('settings-back');await click('menu');await click('board-menu');await chapter('Leaderboard trên đĩa · API và CLI dùng chung data/leaderboard.json');await delay(3000);
+  const verification=JSON.parse(readFileSync('docs/proof/phase-4/verification.json')),bench=JSON.parse(readFileSync('bench.json')),soak=JSON.parse(readFileSync('soak.json')),qa=JSON.parse(readFileSync('docs/proof/phase-4/browser-qa.json')),tap=readFileSync('docs/proof/phase-4/tests.tap','utf8');
+  const evidence={tests:tap.match(/# tests \d+[\s\S]*?# skipped \d+/)?.[0],deterministic_cases:verification.cases.length,headless_default_night1:verification.cases.find(c=>c.name==='default-play'),browser_checks:qa.checks.length,bench,soak:{nights:soak.nights,crashes:soak.crashes,mem_start_mb:soak.mem_start_mb,mem_end_mb:soak.mem_end_mb,duration_s:soak.duration_s}};
+  await evaluate(`(()=>{const e=document.createElement('pre');e.id='demo-proof';e.style='position:fixed;inset:0;z-index:900;overflow:auto;background:#0e1430;color:#f5f1e6;padding:24px 36px;margin:0;font:20px/1.5 monospace;white-space:pre-wrap';e.textContent=${JSON.stringify('KẾT QUẢ THẬT — đọc trực tiếp từ output đã chạy\n'+JSON.stringify(evidence,null,2))};document.body.append(e);})()`);await chapter('Test + headless + benchmark + soak · output thật, không chỉnh sửa');await delay(5000);await evaluate('document.getElementById("demo-proof").scrollTop=550');await delay(5000);await evaluate('document.getElementById("demo-proof").scrollTop=1100');await delay(5000);
+  await browser.page.call('Page.navigate',{url:app.url+'/?benchmark=1&seed=42&duration=30'});await browser.until('Boolean(window.__bench)&&window.__bench.status!=="loading"');await chapter('Cảnh bench 200 Bóng Mực / 100 đom đóm · bản ghi này không dùng tính FPS');await delay(7000);
+  if(browser.errors.length)throw Error(browser.errors.join('\n'));
+}finally{capturing=false;await capture;encoder.stdin.end();const[code]=await exit;await browser.close();await app.close();if(code!==0)throw Error(stderr||'MP4 encoding failed');}
+if(captureError)throw captureError;
+const report={...JSON.parse(stdout),width:1280,height:720,chapters,notes:['Real Chrome frames, automated keyboard input','Measurement summaries loaded from generated JSON/TAP; no fabricated output','No audio track; gameplay uses normal default world; no scenario override']};
+if(report.duration_s>=300)throw Error('Demo must be shorter than five minutes');writeFileSync('docs/demo/recording.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));

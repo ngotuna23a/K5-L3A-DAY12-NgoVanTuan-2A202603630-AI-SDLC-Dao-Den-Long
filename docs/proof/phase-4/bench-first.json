@@ -1,0 +1,19 @@
+{
+  "contract_version": "1.3",
+  "avg_fps": 140.08534471262834,
+  "p1_low_fps": 25.03784790963066,
+  "frame_ms_p95": 24.899999999997817,
+  "frames": 4202,
+  "load_ms": 2453.072021484375,
+  "peak_mem_mb": null,
+  "vsync_off": false,
+  "renderer": "Three.js 0.187.0 / WebGL2 / ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x00009A49) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "os": "win32 10.0.26200",
+  "viewport": [
+    1280,
+    720
+  ],
+  "requested_duration_s": 30,
+  "measured_frame_sum_s": 29.996,
+  "vsync_note": "Browser rAF scheduling cannot be guaranteed unsynchronized; Chrome uncapping flags were requested."
+}

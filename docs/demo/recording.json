@@ -1,0 +1,40 @@
+{
+  "frames": 515,
+  "fps": 10,
+  "duration_s": 51.5,
+  "codec": "mp4v",
+  "audio": false,
+  "width": 1280,
+  "height": 720,
+  "chapters": [
+    {
+      "time_s": 0.0017576999999998862,
+      "title": "Đảo Đèn Lồng · Ngô Văn Tuân · 2A202603630 · L3A"
+    },
+    {
+      "time_s": 4.887010699999999,
+      "title": "Gameplay mặc định · input keyboard tự động, không sửa state"
+    },
+    {
+      "time_s": 18.547483,
+      "title": "Accessibility · remap, conflict, chữ lớn và giảm chuyển động"
+    },
+    {
+      "time_s": 25.7685904,
+      "title": "Leaderboard trên đĩa · API và CLI dùng chung data/leaderboard.json"
+    },
+    {
+      "time_s": 28.8392715,
+      "title": "Test + headless + benchmark + soak · output thật, không chỉnh sửa"
+    },
+    {
+      "time_s": 44.4954676,
+      "title": "Cảnh bench 200 Bóng Mực / 100 đom đóm · bản ghi này không dùng tính FPS"
+    }
+  ],
+  "notes": [
+    "Real Chrome frames, automated keyboard input",
+    "Measurement summaries loaded from generated JSON/TAP; no fabricated output",
+    "No audio track; gameplay uses normal default world; no scenario override"
+  ]
+}
