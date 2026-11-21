@@ -1,4 +1,6 @@
-# Release v1.0.0 — bản chuẩn bị, chưa publish
+# Release v1.0.0
+
+[Bản phát hành trên GitHub](https://github.com/ngotuna23a/K5-L3A-DAY12-NgoVanTuan-2A202603630-AI-SDLC-Dao-Den-Long/releases/tag/v1.0.0) · tag phase-4 và v1.0.0.
 
 Đảo Đèn Lồng: game 3D ba Đêm, giữ ít nhất 60% đèn sáng tới dawn. Contract v1.3 giữ luật v1.2; thêm benchmark chuẩn, soak, leaderboard trên đĩa, remap và accessibility.
 
@@ -10,4 +12,4 @@ Demo MP4 ở docs/demo/demo.mp4, dài khoảng52s, gameplay và input keyboard t
 
 Kiểm tra đóng gói đã giải nén sang thư mục sạch, chạy npm ci/build, HTTP toàn bộ modules, API từ chối tên sai, lưu điểm qua restart server và export bằng CLI process mới. Chi tiết ở docs/proof/phase-4/clean-install.json. npm start ánh xạ trực tiếp node scripts/serve.mjs; smoke test dùng cùng entrypoint ở port ngẫu nhiên để đóng server có kiểm soát.
 
-Chờ chủ bài yêu cầu commit/push, tag `phase-4` và tạo GitHub Release `v1.0.0` kèm ZIP. Chỉ sau khi publish mới đạt phần DoD tag/Release. Không sửa lịch sử các tag phase-1…phase-3.
+Chủ bài đã yêu cầu commit/push và chốt tag `phase-4`, Release `v1.0.0` kèm ZIP/demo. Hai tag trỏ cùng bản bàn giao. Không sửa lịch sử các tag phase-1…phase-3. CI Linux/macOS của bản gameplay Phase4 đã đạt; thay đổi chốt release chỉ cập nhật tài liệu.

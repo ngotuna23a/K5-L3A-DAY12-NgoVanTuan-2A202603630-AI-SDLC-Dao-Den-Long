@@ -10,7 +10,7 @@ Ngô Văn Tuân · 2A202603630 · L3A. Bản tổng hợp trước chốt Releas
 
 **Phase 3:** Fuel nguyên đơn vị 1/60 tránh drift, đặc biệt tại dầu 0/30/100. ADR ghi rõ loại test early win/all_lit, thay bằng dawn ≥60%, giữ regression còn hiệu lực. 65 test, 28 scenario deterministic và bot thắng tick 14400/1595 điểm. Snapshot làm tròn 1 chữ số nhưng bonus dùng floor dầu thật; test tick cuối kiểm tra no_flames, hết dầu rồi relight và dawn. Đọc yêu cầu đầy đủ trước sửa quan trọng hơn thêm feature nhanh.
 
-**Phase 4:** Thêm leaderboard cùng một nguồn đĩa cho UI/export, remap có conflict/restore/persist, caption và cỡ chữ. 71 test và 34 nhóm browser QA đạt. Benchmark chuẩn đủ 200/100 được đo bằng renderer thật, giữ raw frame times; headless không được dùng thay FPS. Soak 10 Đêm một process không crash, RSS tăng khoảng 13.0% với runtime headless đã công bố. Benchmark local avg khoảng 140.9 FPS, load 1.96 s nhưng 1% low khoảng 22.2 FPS; ghi rõ chưa đạt mốc p1 tham khảo trên máy này. Không bỏ khung chậm hay sửa JSON. Release/tag còn cần chủ bài chốt, nên không coi DoD phát hành đã hoàn thành.
+**Phase 4:** Thêm leaderboard cùng một nguồn đĩa cho UI/export, remap có conflict/restore/persist, caption và cỡ chữ. 71 test và 34 nhóm browser QA đạt. Benchmark chuẩn đủ 200/100 được đo bằng renderer thật, giữ raw frame times; headless không được dùng thay FPS. Soak 10 Đêm một process không crash, RSS tăng khoảng 13.0% với runtime headless đã công bố. Benchmark local avg khoảng 140.9 FPS, load 1.96 s nhưng 1% low khoảng 22.2 FPS; ghi rõ chưa đạt mốc p1 tham khảo trên máy này. Không bỏ khung chậm hay sửa JSON. Chủ bài đã yêu cầu chốt Release/tag sau khi review artifact; số đo benchmark local vẫn được công bố nguyên trạng.
 
 ## Làm việc với AI: hiệu quả và sai sót
 

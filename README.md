@@ -2,7 +2,7 @@
 
 **Ngô Văn Tuân · 2A202603630 · L3A** · 26ai.tuannv3@vinuni.edu.vn
 
-Game 3D: cùng Mây gom đom đóm, thắp và giữ ít nhất 60% đèn sáng tới bình minh qua ba hòn đảo. Contract v1.3 giữ toàn bộ luật v1.2. Tag/Release đang chờ chủ bài chốt.
+Game 3D: cùng Mây gom đom đóm, thắp và giữ ít nhất 60% đèn sáng tới bình minh qua ba hòn đảo. Contract v1.3 giữ toàn bộ luật v1.2. Bàn giao: tag `phase-4`, [Release v1.0.0](https://github.com/ngotuna23a/K5-L3A-DAY12-NgoVanTuan-2A202603630-AI-SDLC-Dao-Den-Long/releases/tag/v1.0.0).
 
 ![Đảo Đèn Lồng chạy trong Chrome](docs/proof/phase-4/won-night-3.png)
 
@@ -16,7 +16,7 @@ npm start
 
 Mở **http://localhost:4173**. Yêu cầu Node.js ≥22, Windows/macOS/Linux, Chrome/Edge/Firefox mới với WebGL2 và hardware acceleration. Không CDN; Three.js và license được đóng kèm. RAM khuyến nghị 4 GB; GPU tích hợp hiện đại. Benchmark tự mở Chrome/Edge đã cài, cần desktop session; có thể đặt `CHROME_BIN` tới browser executable. Không cần Python để chơi, build, test, bench hay soak.
 
-Release ZIP `artifacts/dao-den-long-v1.0.0.zip` chứa source, `dist/`, license, proof và demo. Giải nén, chạy `npm start` trong thư mục `dao-den-long-v1.0.0` để dùng bản đã build, không cần tải dependency. Leaderboard cần Node server kèm theo; host chỉ `dist/` vẫn chơi được nhưng không có API lưu bảng điểm. Không mở bằng `file://`. ZIP/Release chưa được publish trước khi người dùng chốt.
+Release ZIP `artifacts/dao-den-long-v1.0.0.zip` chứa source, `dist/`, license, proof và demo. Giải nén, chạy `npm start` trong thư mục `dao-den-long-v1.0.0` để dùng bản đã build, không cần tải dependency. Leaderboard cần Node server kèm theo; host chỉ `dist/` vẫn chơi được nhưng không có API lưu bảng điểm. Không mở bằng `file://`. Tải bản phát hành tại [Release v1.0.0](https://github.com/ngotuna23a/K5-L3A-DAY12-NgoVanTuan-2A202603630-AI-SDLC-Dao-Den-Long/releases/tag/v1.0.0).
 
 ## Điều khiển và accessibility
 
